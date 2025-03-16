@@ -11,5 +11,12 @@
 
 - **Description**: Test the database connection.
 - **Expected Result**: Successful connection to the database.
-- **Actual Result**:
-- **Status**:
+- **Actual Result**: Successful connection to the database.
+- **Status**: Passed
+
+## Test 3: Execute SQL File
+
+- **Description**: Execute the `testsetupdatabase.sql` file to set up the database schema and insert initial data.
+- **Expected Result**: Tables created and data inserted successfully.
+- **Actual Result**: Tables created and data inserted successfully.
+- **Status**: Passed
