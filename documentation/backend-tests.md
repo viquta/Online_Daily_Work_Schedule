@@ -20,3 +20,9 @@
 - **Expected Result**: Tables created and data inserted successfully.
 - **Actual Result**: Tables created and data inserted successfully.
 - **Status**: Passed
+
+## Test 4: Database Connection with Node 
+- **Description**: Test the database connection with node.
+- **Actual Result**: Successful connection to the database.
+- **Status**: Passed
+
