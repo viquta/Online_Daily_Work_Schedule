@@ -30,11 +30,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).send({ error: 'Invalid username or password' });
     }
 
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user.Credential_Id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Create a session
+    req.session.userId = user.Credential_Id;
 
-    // Send the token to the client
-    res.send({ token });
+    // Send the success message to the client
+    res.send({ message: 'Login successful' });
   } catch (err) {
     console.error(err);
     res.status(500).send({ error: 'An error occurred during login' });
