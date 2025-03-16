@@ -1,4 +1,3 @@
-
 -- ============================================================
 -- SQL commands to create the tables in the database.
 -- Tables: Users, Tasks, Work_Schedule, Credentials, Audit_Log.
@@ -49,12 +48,12 @@ CREATE TABLE Work_Schedule (
     User_Id INT NOT NULL,                 -- Foreign key to Users table
     Task_Id INT NOT NULL,                 -- Foreign key to Tasks table
     WeekNr DATE,                          -- Week number
-    MonthNr INT,                          -- Month number
-    Month VARCHAR(50),                    -- Month name
+    Month VARCHAR(7),                     -- Month in YYYY-MM format
+    Date DATE,                            -- Date of the work
     Start_Time TIME,                      -- Start time of the work
     End_Time TIME,                        -- End time of the work
     Break_Time TIME,                      -- Break time during work
-    Date DATE,                            -- Date of the work
+    isReadyForReview BOOLEAN DEFAULT FALSE, -- Indicates if the schedule is ready for review
     FOREIGN KEY (User_Id) REFERENCES Users(Id),
     FOREIGN KEY (Task_Id) REFERENCES Tasks(Task_Id)
 );
