@@ -8,7 +8,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/auth');
 const scheduleRoutes = require('./routes/scheduleRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 
@@ -31,6 +31,13 @@ app.use(session({
   }
 }));
 
+// Add this before your routes
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Session data:', req.session);
+  next();
+});
+
 // Global error handler middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -44,6 +51,26 @@ app.use((err, req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/tasks', taskRoutes);
+
+// Add this right before the 404 handler
+app.get('/test', (req, res) => {
+  res.json({ message: 'Basic test route working!' });
+});
+
+// Add this near your existing test route
+app.post('/test-post', (req, res) => {
+  res.json({ message: 'Post test working!', body: req.body });
+});
+
+// Add this before your 404 handler
+app.get('/debug/session', (req, res) => {
+  res.json({ 
+    session: {
+      userId: req.session.userId,
+      userRole: req.session.userRole
+    }
+  });
+});
 
 // Catch 404
 app.use((req, res) => {
