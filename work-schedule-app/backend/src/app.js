@@ -1,40 +1,60 @@
 // filepath: c:\Users\Victo\Documents\GitHub\Online_Work_Schedule2\work-schedule-app\backend\src\app.js
 
-require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const dotenv = require('dotenv');
 
+// Load environment variables
+dotenv.config();
+
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const scheduleRoutes = require('./routes/scheduleRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+
+// Create Express app
 const app = express();
-const port = process.env.PORT || 3000;
-const db = require('./config/database');
 
-// Middleware for parsing JSON and URL-encoded data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session setup
+// Set up session management
 app.use(session({
-  secret: 'your_secure_session_secret', // Replace with a strong secret
+  secret: process.env.SESSION_SECRET || 'your_secret_key',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Set to true in production
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 }));
 
-// Example route to test sessions
-app.get('/', (req, res) => {
-  if (!req.session.views) {
-    req.session.views = 1;
-  } else {
-    req.session.views++;
-  }
-  res.send(`Number of views: ${req.session.views}`);
+// Global error handler middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error', 
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined 
+  });
 });
 
-// Define routes
-app.use('/api', require('./routes'));
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/schedules', scheduleRoutes);
+app.use('/api/tasks', taskRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Catch 404
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
 });
 
+// Start server
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+// For testing purposes
 module.exports = app;
