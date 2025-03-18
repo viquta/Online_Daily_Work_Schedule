@@ -163,53 +163,54 @@
         
         // Login function
         async function login() {
-            try {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                if (!username || !password) {
-                    showMessage('Username and password are required', true);
-                    return;
-                }
-                
-                const response = await fetch(`${API_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password }),
-                    credentials: 'include'
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error || 'Login failed');
-                }
-                
-                currentUser = data.user;
-                showMessage('Login successful!');
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('appSection').style.display = 'block';
-                
-                // Update UI based on user role
-                if (currentUser.role === 'admin' || currentUser.role === 'manager') {
-                    document.getElementById('adminTaskControls').style.display = 'block';
-                }
-                
-                // Display user info
-                document.getElementById('userDetails').innerHTML = `
-                    <p><strong>Name:</strong> ${currentUser.firstName} ${currentUser.lastName}</p>
-                    <p><strong>Role:</strong> ${currentUser.role}</p>
-                `;
-                
-                // Load tasks and schedules
-                loadTasks();
-                loadSchedules();
-            } catch (error) {
-                showMessage(error.message, true);
-            }
+    try {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+            showMessage('Username and password are required', true);
+            return;
         }
+        
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include',  // This is critical for cookies
+            mode: 'cors'  // Explicitly set CORS mode
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Login failed');
+        }
+        
+        currentUser = data.user;
+        showMessage('Login successful!');
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('appSection').style.display = 'block';
+        
+        // Update UI based on user role
+        if (currentUser.role === 'admin' || currentUser.role === 'manager') {
+            document.getElementById('adminTaskControls').style.display = 'block';
+        }
+        
+        // Display user info
+        document.getElementById('userDetails').innerHTML = `
+            <p><strong>Name:</strong> ${currentUser.firstName} ${currentUser.lastName}</p>
+            <p><strong>Role:</strong> ${currentUser.role}</p>
+        `;
+        
+        // Load tasks and schedules
+        loadTasks();
+        loadSchedules();
+    } catch (error) {
+        showMessage(error.message, true);
+    }
+}
         
         // Register function
         async function register() {
@@ -231,7 +232,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ firstName, lastName, username, password, role }),
-                    credentials: 'include'
+                    credentials: 'include',
+                    mode: 'cors' //added this
                 });
                 
                 const data = await response.json();
@@ -252,7 +254,8 @@
             try {
                 await fetch(`${API_URL}/auth/logout`, {
                     method: 'POST',
-                    credentials: 'include'
+                    credentials: 'include',
+                    mode: 'cors' //added this
                 });
                 
                 currentUser = null;
@@ -268,7 +271,8 @@
         async function loadTasks() {
             try {
                 const response = await fetch(`${API_URL}/tasks`, {
-                    credentials: 'include'
+                    credentials: 'include',
+                    mode: 'cors' //added this
                 });
                 
                 const tasks = await response.json();
@@ -337,7 +341,8 @@
                         taskCategory,
                         taskDescription
                     }),
-                    credentials: 'include'
+                    credentials: 'include',
+                    mode: 'cors' //added this
                 });
                 
                 const data = await response.json();
@@ -362,43 +367,57 @@
         
         // Load schedules
         async function loadSchedules() {
-            try {
-                const response = await fetch(`${API_URL}/schedules`, {
-                    credentials: 'include'
-                });
-                
-                const schedules = await response.json();
-                
-                let schedulesHTML = `
-                    <table>
-                        <tr>
-                            <th>Date</th>
-                            <th>Task</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Break</th>
-                        </tr>
-                `;
-                
-                schedules.forEach(schedule => {
-                    schedulesHTML += `
-                        <tr>
-                            <td>${schedule.Date}</td>
-                            <td>${schedule.Task_Name}</td>
-                            <td>${schedule.Start_Time}</td>
-                            <td>${schedule.End_Time}</td>
-                            <td>${schedule.Break_Time || '-'}</td>
-                        </tr>
-                    `;
-                });
-                
-                schedulesHTML += '</table>';
-                document.getElementById('schedulesList').innerHTML = schedules.length ? 
-                    schedulesHTML : '<p>No schedules found</p>';
-            } catch (error) {
-                showMessage('Error loading schedules', true);
-            }
+    try {
+        const response = await fetch(`${API_URL}/schedules`, {
+            credentials: 'include',
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Error: ${response.status}`);
         }
+        
+        const schedules = await response.json();
+        console.log('Schedules loaded:', schedules);
+        
+        let schedulesHTML = `
+            <table>
+                <tr>
+                    <th>Date</th>
+                    <th>Task</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Break</th>
+                </tr>
+        `;
+        
+        if (schedules.length > 0) {
+            schedules.forEach(schedule => {
+                schedulesHTML += `
+                    <tr>
+                        <td>${schedule.Date}</td>
+                        <td>${schedule.Task_Name || 'Unknown Task'}</td>
+                        <td>${schedule.Start_Time}</td>
+                        <td>${schedule.End_Time}</td>
+                        <td>${schedule.Break_Time || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            schedulesHTML += '</table>';
+        } else {
+            schedulesHTML = '<p>No schedules found. Create one below.</p>';
+        }
+        
+        document.getElementById('schedulesList').innerHTML = schedulesHTML;
+    } catch (error) {
+        console.error('Error loading schedules:', error);
+        document.getElementById('schedulesList').innerHTML = 
+            `<p>Error loading schedules: ${error.message}</p>`;
+        showMessage(`Error loading schedules: ${error.message}`, true);
+    }
+}
         
         // Create schedule
         async function createSchedule() {
@@ -426,7 +445,8 @@
                         endTime,
                         breakTime
                     }),
-                    credentials: 'include'
+                    credentials: 'include',
+                    mode: 'cors' //added this
                 });
                 
                 const data = await response.json();

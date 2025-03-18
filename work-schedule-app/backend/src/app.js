@@ -3,6 +3,7 @@
 const express = require('express');
 const session = require('express-session');
 const dotenv = require('dotenv');
+const cors = require('cors');
 
 // Load environment variables
 dotenv.config();
@@ -19,15 +20,21 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Set up session management
+app.use(cors({
+  origin: true, // Allows any origin during development
+  credentials: true // Allows cookies to be sent
+}));
+
+// Update your session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_secret_key',
+  secret: process.env.SESSION_SECRET || 'your_strong_secret_key',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Set to true in production
+    secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax' // Add this for better security while still allowing cross-origin
   }
 }));
 
