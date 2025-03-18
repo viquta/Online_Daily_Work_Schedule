@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work Schedule</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            flex-direction: row;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+        }
+        .schedule {
+            flex: 3;
+        }
+        .summary {
+            flex: 1;
+            padding-left: 20px;
+            border-left: 2px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .month-selector {
+            margin-bottom: 15px;
+        }
+        .month-table {
+            display: none; /* Hide all month tables by default */
+        }
+        .month-table.active {
+            display: table; /* Show only the active month */
+        }
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="schedule">
+            <div class="header-controls">
+                <h2>Work Schedule</h2>
+                <div class="month-selector">
+                    <label for="month-select">Choose Month: </label>
+                    <select id="month-select" onchange="changeMonth()">
+                        <option value="march">March 2025</option>
+                        <option value="april">April 2025</option>
+                        <option value="may">May 2025</option>
+                    </select>
+                </div>
+                <button>Edit Schedule</button>
+            </div>
+            
+            <!-- March 2025 Table -->
+            <table id="march-table" class="month-table active">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Date</th>
+                        <th>Required Hours</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Break Time</th>
+                        <th>Worked Hours</th>
+                        <th>Difference</th>
+                        <th>Task Description</th>
+                        <th>Overtime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monday</td>
+                        <td>01.03.2025</td>
+                        <td>4:00</td>
+                        <td>09:30</td>
+                        <td>14:00</td>
+                        <td>0:20</td>
+                        <td>4:20</td>
+                        <td>0:20</td>
+                        <td>Software - 60%, Other - 30%, Hardware - 10%</td>
+                        <td>0:00</td>
+                    </tr>
+                    <!-- ... rest of March rows ... -->
+                    <tr>
+                        <td>Tuesday</td>
+                        <td>02.03.2025</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <!-- ... more rows ... -->
+                </tbody>
+            </table>
+            
+            <!-- April 2025 Table -->
+            <table id="april-table" class="month-table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Date</th>
+                        <th>Required Hours</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Break Time</th>
+                        <th>Worked Hours</th>
+                        <th>Difference</th>
+                        <th>Task Description</th>
+                        <th>Overtime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tuesday</td>
+                        <td>01.04.2025</td>
+                        <td>8:00</td>
+                        <td>09:00</td>
+                        <td>17:30</td>
+                        <td>0:30</td>
+                        <td>8:00</td>
+                        <td>0:00</td>
+                        <td>Development - 80%, Meetings - 20%</td>
+                        <td>0:00</td>
+                    </tr>
+                    <!-- ... more April rows ... -->
+                </tbody>
+            </table>
+            
+            <!-- May 2025 Table -->
+            <table id="may-table" class="month-table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Date</th>
+                        <th>Required Hours</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Break Time</th>
+                        <th>Worked Hours</th>
+                        <th>Difference</th>
+                        <th>Task Description</th>
+                        <th>Overtime</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Thursday</td>
+                        <td>01.05.2025</td>
+                        <td>6:00</td>
+                        <td>10:00</td>
+                        <td>16:30</td>
+                        <td>0:30</td>
+                        <td>6:00</td>
+                        <td>0:00</td>
+                        <td>Testing - 50%, Documentation - 50%</td>
+                        <td>0:00</td>
+                    </tr>
+                    <!-- ... more May rows ... -->
+                </tbody>
+            </table>
+        </div>
+        <div class="summary">
+            <h3>Overtime</h3>
+            <p>Current Month: <span id="month-overtime">00:00</span></p>
+            
+            
+            <h3>Vacation Days</h3>
+            <p>Entitlement: 20</p>
+            <p>Used in Month: <span id="month-vacation">2</span></p>
+            <p>Used in Year: 4</p>
+            <p>Remaining Balance: -4</p>
+            <button>Vacation Request Form</button>
+            
+            <h3>Total Hours</h3>
+            <p>Required Total Hours: <span id="required-hours">00:00</span></p>
+            <p>Previous Carryover: 00:00</p>
+            <p>Actual Worked Hours: <span id="worked-hours">21:20</span></p>
+            <p>Difference: <span id="difference-hours">21:20</span></p>
+            
+            <button>Send for Review</button>
+        </div>
+    </div>
+
+    <script>
+        function changeMonth() {
+            // Get the selected month value
+            const selectedMonth = document.getElementById('month-select').value;
+            
+            // Hide all month tables
+            const monthTables = document.getElementsByClassName('month-table');
+            for (let i = 0; i < monthTables.length; i++) {
+                monthTables[i].classList.remove('active');
+            }
+            
+            // Show the selected month table
+            document.getElementById(selectedMonth + '-table').classList.add('active');
+            
+            // Update summary information based on selected month
+            updateSummary(selectedMonth);
+        }
+        
+        function updateSummary(month) {
+            // This function would update the summary values based on the selected month
+            // For this prototype, we'll just set some example values
+            
+            if (month === 'march') {
+                document.getElementById('month-overtime').textContent = '00:00';
+                document.getElementById('month-vacation').textContent = '2';
+                document.getElementById('required-hours').textContent = '00:00';
+                document.getElementById('worked-hours').textContent = '21:20';
+                document.getElementById('difference-hours').textContent = '21:20';
+            } else if (month === 'april') {
+                document.getElementById('month-overtime').textContent = '02:30';
+                document.getElementById('month-vacation').textContent = '1';
+                document.getElementById('required-hours').textContent = '160:00';
+                document.getElementById('worked-hours').textContent = '162:30';
+                document.getElementById('difference-hours').textContent = '02:30';
+            } else if (month === 'may') {
+                document.getElementById('month-overtime').textContent = '01:15';
+                document.getElementById('month-vacation').textContent = '0';
+                document.getElementById('required-hours').textContent = '168:00';
+                document.getElementById('worked-hours').textContent = '169:15';
+                document.getElementById('difference-hours').textContent = '01:15';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import WorkScheduleTable from './components/workScheduleTable.vue'
+import SummaryPanel from './components/summaryPanel.vue'
 </script>
 
 <template>
@@ -11,7 +12,8 @@ import HelloWorld from './components/HelloWorld.vue'
       <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
     </a>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <SummaryPanel />
+  <WorkScheduleTable :month="new Date().getMonth()" :year="new Date().getFullYear()" />
 </template>
 
 <style scoped>
