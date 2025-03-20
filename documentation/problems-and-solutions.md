@@ -27,3 +27,6 @@
 ## Problem 6: JWT (token) vs. Sessions
 - **Description**: A secure way to connect between client and server. A JWT is stored on the client and would work great for cloud based services. However, I want my app to be locally based, so maybe creating sessions could be better than tokens...
 - **Solution**: I think I will go with sessions since my app is locally based and it is not designed to scale its users in the thousands, so I think a normal server should be able to handle the session load without too big of a bottle-neck. Sessions are also easier to handle and can be securely managed in a local environment. With that said, I will probably recommend admins to run their copy of the app with a VPN, or at least use HTTPS (in either case https...). 
+
+
+problem 7: missing N:M table between workschedule tabl and task table (make a tasks-workschedule table) 

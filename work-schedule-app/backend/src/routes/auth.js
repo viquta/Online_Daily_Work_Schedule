@@ -43,7 +43,7 @@ router.post('/register', async (req, res) => {
       const userId = userResult.insertId;
       
       // Hash the password
-      const saltRounds = 10;
+      const saltRounds = 10; //10 is okay I think. It can be a higher number, but then it will cost more computationally for bcrypt to hash the password
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       
       // Create credentials record
@@ -134,6 +134,47 @@ router.post('/login', async (req, res) => {
     console.error('Login error:', err);
     res.status(500).json({ error: 'An error occurred during login' });
   }
+});
+
+// Add this route to your existing auth.js file
+router.get('/me', (req, res) => {
+  // Check if user is authenticated via session
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  
+  // Fetch user data
+  db.query('SELECT * FROM Users WHERE Id = ?', [req.session.userId])
+    .then(([rows]) => {
+      if (rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const user = rows[0];
+      
+      // Return user data (excluding sensitive information)
+      res.json({
+        id: user.Id,
+        firstName: user.First_Name,
+        lastName: user.Last_Name,
+        role: user.Role
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching user:', err);
+      res.status(500).json({ error: 'Server error' });
+    });
+});
+
+// Add a logout endpoint
+router.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to logout' });
+    }
+    res.clearCookie('connect.sid'); // Clear the session cookie
+    res.json({ message: 'Logged out successfully' });
+  });
 });
 
 module.exports = router;

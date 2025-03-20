@@ -9,11 +9,11 @@ const User = {
    */
   async findByUsername(username) {
     try {
-      const [rows] = await db.query(
+      const [rows] = await db.query( //await db.query makes an async query to the database and then it assigns the first element from the array to rows
         `SELECT c.*, u.* 
          FROM Credentials c
          JOIN Users u ON c.User_Id = u.Id
-         WHERE c.Username = ?`,
+         WHERE c.Username = ?`, //prevents sql injection --> ? is a placeholder
         [username]
       );
       
@@ -45,6 +45,10 @@ const User = {
    * @returns {Promise<Object>} - The created user
    */
   async createUser(userData) {
+    /**
+     * This function creates a new user with credentials.
+     * However, it is not needed for this version of the application.
+     */
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();

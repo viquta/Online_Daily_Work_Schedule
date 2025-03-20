@@ -1,3 +1,19 @@
+/**
+ * 1. Login - Sends username and password to your backend's 
+ *  /api/auth/login endpoint, processes the response, and 
+ *  updates the application state accordingly.
+ * 
+  2. Logout - Calls the backend's /api/auth/logout endpoint to 
+    destroy the session on the server, then clears the local user state.  
+
+  3. Get Current User - Checks if there's an active session by calling 
+      /api/auth/me endpoint, important for persisting authentication state
+       when users refresh the page.
+ */
+
+
+
+
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 

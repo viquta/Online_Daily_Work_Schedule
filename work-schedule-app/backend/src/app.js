@@ -20,21 +20,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Configure CORS to work with credentials
 app.use(cors({
-  origin: true, // Allows any origin during development
-  credentials: true // Allows cookies to be sent
+  origin: 'http://localhost:5173', // Your Vue frontend URL (adjust as needed)
+  credentials: true  // This is crucial for cookies to work
 }));
 
 // Update your session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_strong_secret_key',
+  secret: 'your-secret-key', // Use a strong random secret in production
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only require HTTPS in production
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // Add this for better security while still allowing cross-origin
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 

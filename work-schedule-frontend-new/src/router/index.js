@@ -31,32 +31,29 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   
-  // If route requires authentication
+  // If the route requires authentication
   if (to.meta.requiresAuth) {
-    // Check if user is authenticated
-    if (authStore.isAuthenticated) {
-      next(); // Allow navigation
-    } else {
-      // Try to get current user
+    // Check if user is already authenticated
+    if (!authStore.isAuthenticated) {
       try {
+        // Try to get current user session
         const user = await authStore.getCurrentUser();
-        if (user) {
-          next(); // User is authenticated
-        } else {
-          next('/login'); // Redirect to login
+        if (!user) {
+          // Redirect to login if not authenticated
+          return next({ name: 'Login', query: { redirect: to.fullPath } });
         }
       } catch (error) {
-        next('/login'); // Redirect to login on error
+        return next({ name: 'Login', query: { redirect: to.fullPath } });
       }
     }
-  } else {
-    // If user is already authenticated and trying to access login
-    if (authStore.isAuthenticated && to.path === '/login') {
-      next('/dashboard'); // Redirect to dashboard
-    } else {
-      next(); // Allow navigation
+    
+    // If route requires specific role
+    if (to.meta.requiredRole && authStore.user?.role !== to.meta.requiredRole) {
+      return next({ name: 'Unauthorized' });
     }
   }
+  
+  next();
 });
 
 export default router;
