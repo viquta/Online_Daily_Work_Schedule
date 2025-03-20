@@ -1,8 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-import Login from '../components/LoginForm.vue';
-import Register from '../components/RegisterForm.vue';
-import Dashboard from '../components/Dashboard.vue';
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+// Import components
+import Login from '../components/Login.vue'
+import Register from '../components/Register.vue'
+import Dashboard from '../components/Dashboard.vue'
+// ...other imports
 
 const routes = [
   {
@@ -24,22 +27,24 @@ const routes = [
     name: 'dashboard',
     component: Dashboard,
     meta: { requiresAuth: true }
-  }
-];
+  },
+  // ...other routes
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
-});
+})
 
+// Navigation guard for protected routes
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login');
+    next('/login')
   } else {
-    next();
+    next()
   }
-});
+})
 
-export default router;
+export default router

@@ -4,12 +4,12 @@
  * @param {Object} res - Express response object
  * @param {Function} next - Express next function
  */
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.userId) {
-    return next();
+const authenticateUser = (req, res, next) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: 'Unauthorized: Please log in' });
   }
-  return res.status(401).json({ error: 'Unauthorized: Please log in' });
-}
+  next();
+};
 
 /**
  * Middleware to verify if user is an admin
@@ -39,7 +39,7 @@ function isAdminOrManager(req, res, next) {
 }
 
 module.exports = {
-  isAuthenticated,
+  authenticateUser,
   isAdmin,
   isAdminOrManager
 };
