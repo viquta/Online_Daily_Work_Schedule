@@ -24,6 +24,18 @@ const routes = [
     name: 'dashboard',
     component: Dashboard,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/schedules',
+    name: 'schedules',
+    component: () => import('../components/workScheduleTable.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/daily-schedule',
+    name: 'dailySchedule',
+    component: () => import('../components/DailySchedule.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 

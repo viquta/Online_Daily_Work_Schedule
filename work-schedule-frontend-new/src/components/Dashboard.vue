@@ -121,6 +121,16 @@
             </table>
           </div>
         </div>
+
+        <!-- Add buttons to access the editable tables -->
+        <div class="mt-4 d-flex justify-content-center gap-3">
+          <router-link to="/schedules" class="btn btn-primary">
+            <i class="bi bi-table"></i> Edit Monthly Schedule
+          </router-link>
+          <router-link to="/daily-schedule" class="btn btn-primary">
+            <i class="bi bi-pencil-square"></i> Edit Daily Schedule
+          </router-link>
+        </div>
       </div>
     </div>
   </div>

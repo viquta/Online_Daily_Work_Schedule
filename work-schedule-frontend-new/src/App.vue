@@ -1,7 +1,3 @@
-<script setup>
-import WorkScheduleTable from './components/workScheduleTable.vue'
-import SummaryPanel from './components/summaryPanel.vue'
-</script>
 
 <template>
   <router-view />

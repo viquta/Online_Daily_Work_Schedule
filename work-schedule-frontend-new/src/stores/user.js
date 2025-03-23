@@ -15,3 +15,4 @@ export const useUserStore = defineStore('user', {
     },
   },
 })
+//this is only for testing purposes, I'll remove it later

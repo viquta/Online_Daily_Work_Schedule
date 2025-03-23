@@ -106,3 +106,39 @@ SELECT * FROM Work_Schedule;
 SELECT * FROM Work_Schedule_Tasks;
 SELECT * FROM Credentials;
 SELECT * FROM Audit_Log;
+
+
+-- dummy tasks
+-- Insert common work tasks with different categories and descriptions
+INSERT INTO Tasks (Task_Name, Task_Category, Task_Optional_Description, Task_Status) VALUES
+-- Development Tasks
+('Code Review', 'Development', 'Review code changes and provide feedback', 'Active'),
+('Bug Fixing', 'Development', 'Identify and fix software defects', 'Active'),
+('Feature Implementation', 'Development', 'Develop new software features', 'Active'),
+('Database Optimization', 'Development', 'Improve database performance and queries', 'Active'),
+
+-- Meeting Tasks
+('Team Meeting', 'Meetings', 'Regular team sync-up', 'Active'),
+('Client Call', 'Meetings', 'Discussion with clients about project status', 'Active'),
+('Sprint Planning', 'Meetings', 'Plan work for the upcoming sprint', 'Active'),
+('Retrospective', 'Meetings', 'Review completed sprint and identify improvements', 'Active'),
+
+-- Documentation Tasks
+('Technical Documentation', 'Documentation', 'Create or update technical docs', 'Active'),
+('Process Documentation', 'Documentation', 'Document business or development processes', 'Active'),
+('API Documentation', 'Documentation', 'Document API endpoints and usage', 'Active'),
+
+-- Administrative Tasks
+('Time Reporting', 'Administrative', 'Fill in timesheet and reporting', 'Active'),
+('Email Management', 'Administrative', 'Process and respond to emails', 'Active'),
+('Resource Planning', 'Administrative', 'Plan team resources and schedules', 'Active'),
+
+-- Training Tasks
+('Self-Study', 'Training', 'Independent learning on work-related topics', 'Active'),
+('Workshop', 'Training', 'Participate in or conduct a training workshop', 'Active'),
+('Online Course', 'Training', 'Complete online training modules', 'Active'),
+
+-- Project Management Tasks
+('Task Assignment', 'Project Management', 'Assign and track team tasks', 'Active'),
+('Risk Assessment', 'Project Management', 'Identify and mitigate project risks', 'Active'),
+('Progress Tracking', 'Project Management', 'Monitor and report on project progress', 'Active');

@@ -391,6 +391,31 @@ const Schedule = {
       console.error('Error getting schedule by ID:', error);
       throw error;
     }
+  },
+
+  /**
+   * Save day update
+   * @param {Object} day - The day data
+   * @returns {Promise<void>}
+   */
+  async saveDayUpdate(day) {
+    try {
+      this.isSaving = true; // Add a loading state
+      
+      // Use your configured API instance with correct HTTP method
+      await api.put(`/schedules/${day.id}`, day);
+      
+      console.log('Day saved successfully');
+    } catch (error) {
+      console.error('Failed to save day:', error);
+      // Notify the user
+      alert('Failed to save changes. Please try again.');
+      
+      // Optionally reload the correct data
+      await this.fetchDaysForMonth(this.currentMonth, this.currentYear);
+    } finally {
+      this.isSaving = false;
+    }
   }
 };
 
