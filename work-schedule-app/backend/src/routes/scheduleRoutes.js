@@ -9,7 +9,8 @@ const { authenticateUser } = require('../middleware/authMiddleware');
 // Schedule routes
 router.post('/', authenticateUser, scheduleController.createSchedule);
 router.get('/', authenticateUser, scheduleController.getUserSchedules);
-router.get('/:id', authenticateUser, scheduleController.getScheduleById);
+router.get('/date/:date', scheduleController.getSchedulesByDate);
+router.get('/:id([0-9]+)', scheduleController.getScheduleById);  // Only match numeric IDs
 router.put('/:id', authenticateUser, scheduleController.updateSchedule);
 router.delete('/:id', authenticateUser, scheduleController.deleteSchedule);
 

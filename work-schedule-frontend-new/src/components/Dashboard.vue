@@ -37,7 +37,13 @@
               </button>
             </div>
 
-            <table class="table table-striped table-bordered">
+            <div v-if="loading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <table v-else-if="dailySchedule.length > 0" class="table table-striped table-bordered">
               <thead class="bg-light">
                 <tr>
                   <th style="width: 15%">Time</th>
@@ -64,9 +70,14 @@
               </tbody>
             </table>
 
+            <div v-else class="alert alert-info">
+              No tasks scheduled for this day.
+            </div>
+
+            <!-- Update the Add New Task button to navigate to the daily schedule editor -->
             <div class="text-center mt-4">
-              <button class="btn btn-success">
-                Add New Task
+              <button class="btn btn-success" @click="router.push(`/daily-schedule?date=${selectedDate.value.toISOString().split('T')[0]}`)">
+                <i class="bi bi-plus-circle"></i> Add New Task
               </button>
             </div>
           </div>
@@ -85,7 +96,13 @@
               </button>
             </div>
             
-            <table class="table table-bordered">
+            <div v-if="loading" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <table v-else class="table table-bordered">
               <thead class="bg-light">
                 <tr>
                   <th v-for="day in weekDays" :key="day" class="text-center">{{ day }}</th>
@@ -137,24 +154,115 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import api from '../services/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const viewMode = ref('daily'); // Default to daily view
+const loading = ref(false);
 
 // For daily schedule
 const selectedDate = ref(new Date());
-const dailySchedule = ref([
-  { time: '08:00 - 09:00', task: 'Team Meeting', priority: 'high' },
-  { time: '09:00 - 10:30', task: 'Project Planning', priority: 'medium' },
-  { time: '10:30 - 12:00', task: 'Development', priority: 'high' },
-  { time: '12:00 - 13:00', task: 'Lunch Break', priority: 'normal' },
-  { time: '13:00 - 15:30', task: 'Client Meeting', priority: 'high' },
-  { time: '15:30 - 17:00', task: 'Code Review', priority: 'medium' }
-]);
+const dailySchedule = ref([]);
+
+// Replace hardcoded data with API fetching
+const fetchDailySchedule = async () => {
+  loading.value = true;
+  try {
+    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    const response = await api.scheduleApi.getScheduleById(formattedDate);
+    
+    if (response.data && Array.isArray(response.data.tasks)) {
+      dailySchedule.value = response.data.tasks.map(task => ({
+        time: task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : '',
+        task: task.taskDescription || task.Task_Name,
+        priority: task.priority || 'normal'
+      }));
+    } else {
+      dailySchedule.value = [];
+    }
+  } catch (error) {
+    console.error('Failed to fetch daily schedule:', error);
+    dailySchedule.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// For monthly schedule
+const currentMonth = ref(new Date());
+const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const monthlyEvents = ref({});
+
+// Fetch monthly events from API
+const fetchMonthlyEvents = async () => {
+  loading.value = true;
+  try {
+    const year = currentMonth.value.getFullYear();
+    const month = currentMonth.value.getMonth() + 1;
+    const response = await api.scheduleApi.getSchedules({ 
+      year, 
+      month 
+    });
+
+    // Transform API data into the format your calendar expects
+    const events = {};
+    if (response.data && Array.isArray(response.data)) {
+      response.data.forEach(schedule => {
+        const day = new Date(schedule.date).getDate();
+        if (!events[day]) events[day] = [];
+        
+        // Map each task to an event
+        schedule.tasks.forEach(task => {
+          events[day].push({
+            title: task.taskDescription,
+            type: mapPriorityToType(task.priority)
+          });
+        });
+      });
+    }
+    monthlyEvents.value = events;
+  } catch (error) {
+    console.error('Failed to fetch monthly events:', error);
+    monthlyEvents.value = {};
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Helper function to map task priority to event type
+const mapPriorityToType = (priority) => {
+  switch(priority) {
+    case 'high': return 'deadline';
+    case 'medium': return 'meeting';
+    case 'normal': return 'work';
+    default: return 'info';
+  }
+};
+
+// Update eventsForDay to use the reactive monthlyEvents
+const eventsForDay = (day) => {
+  return monthlyEvents.value[day] || [];
+};
+
+// Watch for date/month changes and update data
+watch(selectedDate, () => {
+  fetchDailySchedule();
+});
+
+watch(currentMonth, () => {
+  fetchMonthlyEvents();
+});
+
+// Fetch initial data on component mount
+onMounted(() => {
+  fetchDailySchedule();
+  fetchMonthlyEvents();
+});
+
 
 const formattedDate = computed(() => {
   return selectedDate.value.toLocaleDateString('en-US', {
@@ -177,9 +285,7 @@ const goToNextDay = () => {
   selectedDate.value = newDate;
 };
 
-// For monthly schedule
-const currentMonth = ref(new Date());
-const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 
 const monthYear = computed(() => {
   return currentMonth.value.toLocaleDateString('en-US', {
@@ -233,20 +339,6 @@ const calendar = computed(() => {
   
   return calendarArray;
 });
-
-// Sample monthly events
-const monthlyEvents = {
-  5: [{ title: 'Team Meeting', type: 'work' }],
-  12: [{ title: 'Project Deadline', type: 'deadline' }],
-  15: [{ title: 'Client Call', type: 'meeting' }],
-  20: [{ title: 'Training', type: 'work' }],
-  25: [{ title: 'Vacation', type: 'vacation' }],
-  26: [{ title: 'Vacation', type: 'vacation' }]
-};
-
-const eventsForDay = (day) => {
-  return monthlyEvents[day] || [];
-};
 
 const goToPreviousMonth = () => {
   const newDate = new Date(currentMonth.value);

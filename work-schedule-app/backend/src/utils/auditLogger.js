@@ -10,10 +10,9 @@ const db = require('../config/database');
 async function logAction(userId, actionType, actionDetails) {
   try {
     const [result] = await db.query(
-      'INSERT INTO Audit_Log (User_Id, Action_Type, Action_Details, Action_Timestamp) VALUES (?, ?, ?, NOW())',
+      "INSERT INTO Audit_Log (User_Id, Action, Details, Timestamp) VALUES (?, ?, ?, NOW())",
       [userId, actionType, actionDetails]
     );
-    
     return {
       id: result.insertId,
       userId,
@@ -57,21 +56,21 @@ async function getAuditLogs(options = {}) {
     }
     
     if (actionType) {
-      query += ' AND al.Action_Type = ?';
+      query += ' AND al.Action = ?';
       params.push(actionType);
     }
     
     if (startDate) {
-      query += ' AND al.Action_Timestamp >= ?';
+      query += ' AND al.Timestamp >= ?';
       params.push(startDate);
     }
     
     if (endDate) {
-      query += ' AND al.Action_Timestamp <= ?';
+      query += ' AND al.Timestamp <= ?';
       params.push(endDate);
     }
     
-    query += ' ORDER BY al.Action_Timestamp DESC LIMIT ?';
+    query += ' ORDER BY al.Timestamp DESC LIMIT ?';
     params.push(limit);
     
     const [logs] = await db.query(query, params);

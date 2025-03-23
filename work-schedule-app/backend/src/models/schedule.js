@@ -377,15 +377,35 @@ const Schedule = {
    */
   async getScheduleById(scheduleId) {
     try {
+      // Check if value exists
+      if (scheduleId === undefined || scheduleId === null) {
+        throw new Error('Schedule ID is required');
+      }
+      
+      // Parse ID - simpler validation
+      const id = parseInt(scheduleId, 10);
+      if (isNaN(id) || id <= 0) {
+        throw new Error('Invalid Schedule ID: must be a positive integer');
+      }
+      
+      // Remove the string comparison that was causing issues
+      
       const [schedules] = await db.query(
         'SELECT * FROM Work_Schedule WHERE WS_Id = ?',
-        [scheduleId]
+        [id]
       );
 
-      if (schedules.length === 0) {
+      console.log('Raw query results:', schedules);
+      console.log('SQL executed:', 'SELECT * FROM Work_Schedule WHERE WS_Id = ' + id);
+
+      // Try a direct raw query to verify
+      const [directCheck] = await db.query('SELECT COUNT(*) as count FROM Work_Schedule');
+      console.log('Total schedules in database:', directCheck[0].count);
+  
+      if (!schedules || schedules.length === 0) {
         throw new Error('Schedule not found');
       }
-
+  
       return schedules[0];
     } catch (error) {
       console.error('Error getting schedule by ID:', error);
@@ -416,7 +436,27 @@ const Schedule = {
     } finally {
       this.isSaving = false;
     }
-  }
+  },
+
+  /**
+   * Get schedules by user and date
+   * @param {number} userId - The user ID
+   * @param {string} date - The date
+   * @returns {Promise<Array>} - List of schedules
+   */
+  async getSchedulesByUserAndDate(userId, date) {
+    try {
+      const [schedules] = await db.query(
+        'SELECT * FROM Work_Schedule WHERE User_Id = ? AND Date = ?',
+        [userId, date]
+      );
+      
+      return schedules;
+    } catch (error) {
+      console.error('Error getting schedules by user and date:', error);
+      throw error;
+    }
+  },
 };
 
 module.exports = Schedule;

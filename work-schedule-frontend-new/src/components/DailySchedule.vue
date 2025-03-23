@@ -11,8 +11,21 @@
       </button>
     </div>
 
+    <!-- Loading indicator -->
+    <div v-if="loading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- No data message -->
+    <div v-else-if="dailySchedule.length === 0" class="text-center py-4">
+      <p>No schedule data for this day. Add a new task to get started.</p>
+    </div>
+
     <!-- DataTable Component -->
     <DataTable 
+      v-else
       :options="tableOptions"
       class="display table table-striped table-bordered"
       ref="dataTable"
@@ -21,6 +34,11 @@
     <div class="text-center mt-4">
       <button class="btn btn-success" @click="addNewTask">
         <i class="bi bi-plus-circle"></i> Add New Task
+      </button>
+      
+      <!-- Back to Schedule button -->
+      <button class="btn btn-secondary ms-2" @click="router.push('/schedules')">
+        <i class="bi bi-arrow-left"></i> Back to Schedule
       </button>
     </div>
   </div>
@@ -33,7 +51,10 @@ import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-bs5';
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import $ from 'jquery'; // Add jQuery import
+import $ from 'jquery';
+import api from '../services/api'; // Make sure this is imported
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 // Initialize DataTables
 DataTable.use(DataTablesCore);
@@ -41,15 +62,49 @@ DataTable.use(DataTablesCore);
 const authStore = useAuthStore();
 const selectedDate = ref(new Date());
 const dataTable = ref(null);
+const loading = ref(true);
 
-const dailySchedule = ref([
-  { time: '08:00 - 09:00', task: 'Team Meeting', priority: 'high' },
-  { time: '09:00 - 10:30', task: 'Project Planning', priority: 'medium' },
-  { time: '10:30 - 12:00', task: 'Development', priority: 'high' },
-  { time: '12:00 - 13:00', task: 'Lunch Break', priority: 'normal' },
-  { time: '13:00 - 15:30', task: 'Client Meeting', priority: 'high' },
-  { time: '15:30 - 17:00', task: 'Code Review', priority: 'medium' }
-]);
+// Replace hard-coded data with an empty array that will be populated from API
+const dailySchedule = ref([]);
+
+// Function to fetch schedule data from API
+const fetchDailySchedule = async () => {
+  loading.value = true;
+  try {
+    // Format date as YYYY-MM-DD for API
+    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    
+    // Use your API service to fetch schedule data
+    const response = await api.scheduleApi.getScheduleById(formattedDate);
+    
+    if (response.data && Array.isArray(response.data.tasks)) {
+      // Transform API data to match your component's structure
+      dailySchedule.value = response.data.tasks.map(task => ({
+        time: task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : '',
+        task: task.taskDescription || task.Task_Name,
+        priority: task.priority || 'normal'
+      }));
+    } else {
+      // If no data, show empty array
+      dailySchedule.value = [];
+    }
+  } catch (error) {
+    console.error('Failed to fetch schedule:', error);
+    dailySchedule.value = []; // Reset to empty on error
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Call this when component mounts
+onMounted(() => {
+  fetchDailySchedule();
+});
+
+// Update data when date changes
+watch(selectedDate, () => {
+  fetchDailySchedule();
+});
 
 // Format the data for DataTables and provide column definitions
 const tableOptions = computed(() => ({
@@ -136,9 +191,8 @@ const goToNextDay = () => {
   newDate.setDate(newDate.getDate() + 1);
   selectedDate.value = newDate;
 };
-// Update the addNewTask function:
 
-const addNewTask = () => {
+const addNewTask = async () => {
   // Add a new empty task to the beginning of the array
   const newTask = {
     time: '00:00 - 00:00', 
@@ -147,6 +201,20 @@ const addNewTask = () => {
   };
   
   dailySchedule.value.unshift(newTask);
+  
+  // Save to API
+  try {
+    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    await api.scheduleApi.addTaskToSchedule(formattedDate, {
+      startTime: '00:00',
+      endTime: '00:00',
+      taskDescription: 'New Task',
+      priority: 'normal'
+    });
+  } catch (error) {
+    console.error('Failed to save new task:', error);
+    // Could add error handling here
+  }
   
   // Refresh the table and immediately edit the new task
   if (dataTable.value?.dt) {
@@ -230,7 +298,8 @@ const editTask = (taskName) => {
 
 // Add new functions for saving changes and canceling
 
-const saveRowChanges = (index, $row) => {
+// Update saveRowChanges to call the API
+const saveRowChanges = async (index, $row) => {
   // Get values from inputs
   const newTime = $row.find('td:eq(0) input').val();
   const newTask = $row.find('td:eq(1) input').val();
@@ -240,6 +309,24 @@ const saveRowChanges = (index, $row) => {
   dailySchedule.value[index].time = newTime;
   dailySchedule.value[index].task = newTask;
   dailySchedule.value[index].priority = newPriority;
+  
+  // Extract start and end times
+  const [startTime, endTime] = newTime.split(' - ');
+  
+  // Save to API
+  try {
+    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    const taskId = index; // You may need to store actual task IDs in your data
+    await api.scheduleApi.updateScheduleTask(formattedDate, taskId, {
+      startTime,
+      endTime,
+      taskDescription: newTask,
+      priority: newPriority
+    });
+  } catch (error) {
+    console.error('Failed to update task:', error);
+    // Could add error handling here
+  }
   
   // Refresh the table
   if (dataTable.value?.dt) {
@@ -254,12 +341,25 @@ const cancelEditing = () => {
   }
 };
 
-const deleteTask = (taskName) => {
+// Update deleteTask to call the API
+const deleteTask = async (taskName) => {
   if (confirm(`Are you sure you want to delete task: ${taskName}?`)) {
-    // Remove the task from dailySchedule
+    // Find the task index
     const index = dailySchedule.value.findIndex(item => item.task === taskName);
+    
     if (index !== -1) {
+      // Remove from UI
       dailySchedule.value.splice(index, 1);
+      
+      // Delete from API
+      try {
+        const formattedDate = selectedDate.value.toISOString().split('T')[0];
+        const taskId = index; // You may need to store actual task IDs
+        await api.scheduleApi.removeTaskFromSchedule(formattedDate, taskId);
+      } catch (error) {
+        console.error('Failed to delete task:', error);
+        // Could add error handling or rollback UI change
+      }
       
       // Update the DataTable
       if (dataTable.value?.dt) {

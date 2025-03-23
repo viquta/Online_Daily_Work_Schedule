@@ -77,6 +77,9 @@ export const useScheduleStore = defineStore('schedule', {
       } catch (error) {
         console.error('Failed to save update:', error);
       }
+    },
+    addSchedule(schedule) {
+      this.schedules.push(schedule); // Or however you're storing schedules
     }
   },
 })

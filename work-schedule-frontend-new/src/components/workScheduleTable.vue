@@ -1,10 +1,18 @@
 <template>
   <div>
+     <!-- Add this nav/header section at the top -->
+     <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>Work Schedule</h2>
+      <button class="btn btn-secondary" @click="goBackToSchedule">
+        <i class="bi bi-arrow-left"></i> Back to Schedule
+      </button>
+    </div>
     
     <div class="alert alert-info mb-3">
       <i class="bi bi-info-circle me-2"></i> 
       Click on any cell to edit its value. Press Enter to save or Escape to cancel.
     </div>
+   
     
     <div class="schedule-table-container">
       <!-- DataTable Component -->
@@ -302,6 +310,9 @@ const submitForm = async () => {
     const response = await api.post('/schedules', payload);
     console.log('Schedule created successfully:', response.data);
 
+    // Add the new schedule to the store
+    scheduleStore.addSchedule(response.data);
+
     // Reset the form
     scheduleData.value.scheduleType = 'daily';
     scheduleData.value.date = '';
@@ -311,7 +322,7 @@ const submitForm = async () => {
     scheduleData.value.breakTime = '';
     scheduleData.value.tasks = [{ taskId: '', description: '', completionPercentage: 0, notes: '' }];
     
-    // Add router navigation from second script
+    // Navigate to schedules page to see the updated list
     router.push('/schedules');
   } catch (error) {
     console.error('Error creating schedule:', error);
@@ -361,6 +372,14 @@ const saveEdit = ($cell, value, dt, cellIndex, rowData, columnIndex) => {
   // Remove editing class
   $cell.removeClass('editing');
 }
+
+
+
+const goBackToSchedule = () => {
+  // Navigate back to the schedule view
+  router.push('/schedules');
+}
+
 
 const cancelEdit = ($cell) => {
   if (!$cell.hasClass('editing')) return;

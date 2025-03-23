@@ -54,6 +54,9 @@ const scheduleController = {
 
       // Create the schedule first
       const schedule = await Schedule.createSchedule(finalScheduleData);
+      // Force a small delay to ensure database writes are committed
+      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log('Created schedule with ID:', schedule.WS_Id, 'type:', typeof schedule.WS_Id);
       
       // Now add all tasks to the schedule
       const taskPromises = tasks.map(task => 
@@ -88,6 +91,24 @@ const scheduleController = {
     }
   },
 
+  async getSchedulesByDate(req, res) {
+    try {
+      const { date } = req.params;
+      const userId = req.session.userId;
+      
+      if (!date) {
+        return res.status(400).json({ error: 'Date parameter is required' });
+      }
+      
+      // You'll need to modify this based on your model's function name
+      const schedules = await Schedule.getSchedulesByUserAndDate(userId, date);
+      
+      res.json(schedules);
+    } catch (error) {
+      console.error('Error getting schedules by date:', error);
+      res.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  },
   /**
    * Get schedules for the authenticated user
    * @param {Object} req - Express request object
@@ -261,6 +282,7 @@ const scheduleController = {
       }
       
       // Add task to schedule
+      console.log('Adding task to schedule ID:', scheduleId, 'type:', typeof scheduleId);
       const scheduleTask = await Schedule.addTaskToSchedule(scheduleId, {
         taskId: taskData.taskId,
         description: taskData.description || null,
