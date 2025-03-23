@@ -29,4 +29,63 @@
 - **Solution**: I think I will go with sessions since my app is locally based and it is not designed to scale its users in the thousands, so I think a normal server should be able to handle the session load without too big of a bottle-neck. Sessions are also easier to handle and can be securely managed in a local environment. With that said, I will probably recommend admins to run their copy of the app with a VPN, or at least use HTTPS (in either case https...). 
 
 
-problem 7: missing N:M table between workschedule tabl and task table (make a tasks-workschedule table) 
+## Problem 7: Missing N:M Relationship Between Work Schedule and Tasks
+- **Description**: The database schema needed a junction table to represent the many-to-many relationship between work schedules and tasks. A single work schedule could have multiple tasks, and tasks could be assigned to different schedules.
+- **Solution**: Created a `Work_Schedule_Tasks` junction table with foreign keys to both the `Work_Schedule` and `Tasks` tables. Added additional fields like `Task_Description`, `Completion_Percentage`, and `Notes` to store instance-specific information about each task assignment.
+
+## Problem 8: Implementing Editable DataTables
+- **Description**: Needed a way for users to edit schedule information directly in the table cells without requiring separate forms for each edit.
+- **Solution**: 
+  - Implemented DataTables with jQuery integration:
+    - Added click-to-edit functionality using DataTables and jQuery.
+    - Configured input types based on column data (time inputs, text inputs).
+    - Added visual feedback during editing with CSS styles.
+    - Implemented keyboard shortcuts (Enter to save, Escape to cancel).
+    - Connected cell edits to Pinia store for state management.
+
+## Problem 9: Frontend-Backend API Connection Issues
+- **Description**: The frontend wasn't properly connecting to the backend API, resulting in failure to load tasks and save changes to schedules.
+- **Solution**: Fixed the API service export to include direct Axios methods alongside the specialized API objects:
+  ```javascript
+  export default {
+    scheduleApi,
+    taskApi,
+    userApi,
+    // Direct Axios methods
+    get: (url, config) => api.get(url, config),
+    post: (url, data, config) => api.post(url, data, config),
+## Problem 10: Missing Required Props in Component
+- **Description**: The `WorkScheduleTable` component required `month` and `year` props, but these weren't provided when navigating to the route, causing Vue warnings.
+- **Solution**: Added default prop values to use the current month and year when not explicitly provided:
+  ```javascript
+  const props = defineProps({
+    month: {
+      type: Number,
+      default: () => new Date().getMonth() + 1
+    },
+    year: {
+      type: Number,
+      default: () => new Date().getFullYear()
+    }
+  });
+  ```
+  year: {
+    type: Number,
+    default: () => new Date().getFullYear()
+  }
+})
+
+
+Problem 11: No Tasks Available for Selection
+Description: The task dropdown was empty, preventing users from assigning tasks to schedules.
+Solution:
+Fixed the API connection to correctly fetch tasks
+Added sample task data to the database
+Ensured proper data format for task objects
+Problem 12: Navigation and User Experience
+Description: Users needed a way to navigate between the dashboard and schedule editors, and clear feedback on editing capabilities.
+Solution:
+Added "Back to Dashboard" buttons for navigation
+Included visual indicators for editable cells
+Added help text to explain editing functionality
+Improved styling to highlight interactive elements
