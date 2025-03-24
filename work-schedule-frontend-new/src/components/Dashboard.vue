@@ -3,28 +3,16 @@
   <div class="container mt-4">
     <div class="card shadow">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h2>Work Schedule</h2>
-        <div>
-          <div class="btn-group me-3">
-            <button 
-              :class="['btn', viewMode === 'daily' ? 'btn-primary' : 'btn-outline-primary']" 
-              @click="viewMode = 'daily'"
-            >
-              Daily View
-            </button>
-            <button 
-              :class="['btn', viewMode === 'monthly' ? 'btn-primary' : 'btn-outline-primary']" 
-              @click="viewMode = 'monthly'"
-            >
-              Monthly View
-            </button>
-          </div>
-          <button class="btn btn-outline-danger" @click="handleLogout">Logout</button>
-        </div>
-      </div>
+  <h2>Work Schedule</h2>
+  <div>
+    <!-- Replace the button group with just a simple title -->
+    <span class="me-3">Daily View</span>
+    <button class="btn btn-outline-danger" @click="handleLogout">Logout</button>
+  </div>
+</div>
       <div class="card-body">
         <!-- Replace existing content with our new schedule views -->
-        <div v-if="viewMode === 'daily'">
+        <div>
           <!-- Daily Schedule -->
           <div>
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -76,78 +64,14 @@
                 <i class="bi bi-plus-circle"></i> Create Schedule
               </button>
             </div>
-
-            <!-- Update the Add New Task button to navigate to the daily schedule editor -->
-            <div class="text-center mt-4">
-              <button class="btn btn-success" @click="router.push(`/daily-schedule?date=${selectedDate.value.toISOString().split('T')[0]}`)">
-                <i class="bi bi-plus-circle"></i> Add New Task
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div v-else>
-          <!-- Monthly Schedule -->
-          <div>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <button class="btn btn-outline-secondary" @click="goToPreviousMonth">
-                Previous Month
-              </button>
-              <h3 class="mb-0">{{ monthYear }}</h3>
-              <button class="btn btn-outline-secondary" @click="goToNextMonth">
-                Next Month
-              </button>
-            </div>
-            
-            <div v-if="loading" class="text-center py-4">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-
-            <table v-else class="table table-bordered">
-              <thead class="bg-light">
-                <tr>
-                  <th v-for="day in weekDays" :key="day" class="text-center">{{ day }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(week, weekIndex) in calendar" :key="weekIndex">
-                  <td 
-                    v-for="(day, dayIndex) in week" 
-                    :key="dayIndex"
-                    class="position-relative"
-                    style="height: 100px; vertical-align: top;"
-                  >
-                    <template v-if="day !== null">
-                      <div class="fw-bold mb-2">{{ day }}</div>
-                      <div v-for="(event, idx) in eventsForDay(day)" :key="idx" class="mb-1">
-                        <span 
-                          :class="[
-                            'badge',
-                            event.type === 'work' ? 'bg-primary' : 
-                            event.type === 'meeting' ? 'bg-warning' : 
-                            event.type === 'deadline' ? 'bg-danger' : 
-                            event.type === 'vacation' ? 'bg-success' : 'bg-info'
-                          ]"
-                        >
-                          {{ event.title }}
-                        </span>
-                      </div>
-                    </template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
 
         <!-- Add buttons to access the editable tables -->
         <div class="mt-4 d-flex justify-content-center gap-3">
-          <router-link to="/schedules" class="btn btn-primary">
-            <i class="bi bi-table"></i> Edit Monthly Schedule
-          </router-link>
-          <router-link to="/daily-schedule" class="btn btn-primary">
+          <router-link 
+            :to="`/daily-schedule?date=${selectedDate.value ? selectedDate.value.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}`"  
+            class="btn btn-primary">
             <i class="bi bi-pencil-square"></i> Edit Daily Schedule
           </router-link>
         </div>
@@ -164,14 +88,13 @@ import api from '../services/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const viewMode = ref('daily'); // Default to daily view
 const loading = ref(false);
 
 // For daily schedule
 const selectedDate = ref(new Date());
 const dailySchedule = ref([]);
 
-// At the top of fetchDailySchedule
+// Debug logging
 console.log('scheduleApi methods:', Object.keys(api.scheduleApi));
 
 const fetchDailySchedule = async () => {
@@ -183,24 +106,20 @@ const fetchDailySchedule = async () => {
     // Debug: Check what API methods are available
     console.log('API methods:', Object.keys(api));
     
-    // For daily view - try these variations
-    const response = await api.scheduleApi.getSchedules({ date: formattedDate});
+    // For daily view
+    const response = await api.scheduleApi.getSchedules({ date: formattedDate });
 
     console.log('Raw response data:', response.data);
     
-    // Transform the data to match your component's expected format
     if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      // Filter for schedules matching today's date
       console.log('Before filtering - schedules in response:', response.data.length);
       console.log('Looking for date:', formattedDate);
 
       const todaysSchedules = response.data.filter(schedule => {
-        // Try all possible date field names with flexible matching
         const scheduleDate = schedule.Date || schedule.date;
         
         if (!scheduleDate) return false;
         
-        // Log every schedule for debugging (keep existing logging)
         console.log('Schedule:', {
           id: schedule.WS_Id, 
           date: scheduleDate,
@@ -209,13 +128,10 @@ const fetchDailySchedule = async () => {
           dateStart: scheduleDate?.substring(0, 10)
         });
         
-        // Try exact match
         if (scheduleDate === formattedDate) return true;
         
-        // Try substring match (for timestamps)
         if (scheduleDate.substring(0, 10) === formattedDate) return true;
         
-        // Try to compare actual date objects
         try {
           const dateObj = new Date(scheduleDate);
           const compareDate = new Date(formattedDate);
@@ -228,40 +144,35 @@ const fetchDailySchedule = async () => {
       console.log('After filtering - found schedules:', todaysSchedules.length);
       
       if (todaysSchedules.length > 0) {
-  console.log(`Found ${todaysSchedules.length} schedules for today`);
-  
-  // Array to hold all tasks from all schedules
-  let allTasks = [];
-  
-  // Process each schedule for today
-  todaysSchedules.forEach(schedule => {
-    console.log('Processing schedule:', schedule.WS_Id);
-    
-    // Check for tasks in the schedule
-    if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
-      // Add these tasks to our collection
-      const scheduleTasks = schedule.tasks.map(task => ({
-        time: formatTime(schedule.Start_Time || schedule.startTime),
-        task: task.Task_Description || task.description || 'No description',
-        priority: getPriorityFromTask(task),
-        scheduleId: schedule.WS_Id // Add this so you know which schedule it came from
-      }));
-      
-      allTasks = [...allTasks, ...scheduleTasks];
-    }
-  });
-  
-  // Sort all tasks by time
-  allTasks.sort((a, b) => {
-    return a.time.localeCompare(b.time);
-  });
-  
-  console.log(`Combined ${allTasks.length} tasks from all schedules`);
-  dailySchedule.value = allTasks;
-} else {
-  console.log('No schedule found for today in the data');
-  dailySchedule.value = [];
-}
+        console.log(`Found ${todaysSchedules.length} schedules for today`);
+        
+        let allTasks = [];
+        
+        todaysSchedules.forEach(schedule => {
+          console.log('Processing schedule:', schedule.WS_Id);
+          
+          if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
+            const scheduleTasks = schedule.tasks.map(task => ({
+              time: formatTime(schedule.Start_Time || schedule.startTime),
+              task: task.Task_Description || task.description || 'No description',
+              priority: getPriorityFromTask(task),
+              scheduleId: schedule.WS_Id
+            }));
+            
+            allTasks = [...allTasks, ...scheduleTasks];
+          }
+        });
+        
+        allTasks.sort((a, b) => {
+          return a.time.localeCompare(b.time);
+        });
+        
+        console.log(`Combined ${allTasks.length} tasks from all schedules`);
+        dailySchedule.value = allTasks;
+      } else {
+        console.log('No schedule found for today in the data');
+        dailySchedule.value = [];
+      }
     } else {
       console.log('No schedule data returned from API');
       dailySchedule.value = [];
@@ -269,7 +180,7 @@ const fetchDailySchedule = async () => {
   } catch (error) {
     console.error('Failed to fetch daily schedule:', error);
     console.error('Error details:', error.response?.data || 'No error details');
-    dailySchedule.value = [];  // Empty array instead of null
+    dailySchedule.value = [];
   } finally {
     loading.value = false;
   }
@@ -290,77 +201,15 @@ const formatTime = (timeString) => {
   });
 };
 
-// For monthly schedule
-const currentMonth = ref(new Date());
-const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const monthlyEvents = ref({});
-
-// Fetch monthly events from API
-const fetchMonthlyEvents = async () => {
-  loading.value = true;
-  try {
-    const year = currentMonth.value.getFullYear();
-    const month = currentMonth.value.getMonth() + 1;
-    const response = await api.scheduleApi.getSchedules({ 
-      year, 
-      month 
-    });
-
-    // Transform API data into the format your calendar expects
-    const events = {};
-    if (response.data && Array.isArray(response.data)) {
-      response.data.forEach(schedule => {
-        const day = new Date(schedule.date).getDate();
-        if (!events[day]) events[day] = [];
-        
-        // Map each task to an event
-        schedule.tasks.forEach(task => {
-          events[day].push({
-            title: task.taskDescription,
-            type: mapPriorityToType(task.priority)
-          });
-        });
-      });
-    }
-    monthlyEvents.value = events;
-  } catch (error) {
-    console.error('Failed to fetch monthly events:', error);
-    monthlyEvents.value = {};
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Helper function to map task priority to event type
-const mapPriorityToType = (priority) => {
-  switch(priority) {
-    case 'high': return 'deadline';
-    case 'medium': return 'meeting';
-    case 'normal': return 'work';
-    default: return 'info';
-  }
-};
-
-// Update eventsForDay to use the reactive monthlyEvents
-const eventsForDay = (day) => {
-  return monthlyEvents.value[day] || [];
-};
-
-// Watch for date/month changes and update data
+// Watch for date changes and update data
 watch(selectedDate, () => {
   fetchDailySchedule();
-});
-
-watch(currentMonth, () => {
-  fetchMonthlyEvents();
 });
 
 // Fetch initial data on component mount
 onMounted(() => {
   fetchDailySchedule();
-  fetchMonthlyEvents();
 });
-
 
 const formattedDate = computed(() => {
   return selectedDate.value.toLocaleDateString('en-US', {
@@ -385,71 +234,6 @@ const goToNextDay = () => {
 
 const createNewSchedule = () => {
   router.push(`/daily-schedule?date=${selectedDate.value.toISOString().split('T')[0]}`);
-};
-
-const monthYear = computed(() => {
-  return currentMonth.value.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric'
-  });
-});
-
-const calendar = computed(() => {
-  const year = currentMonth.value.getFullYear();
-  const month = currentMonth.value.getMonth();
-  
-  // First day of month
-  const firstDay = new Date(year, month, 1);
-  // Last day of month
-  const lastDay = new Date(year, month + 1, 0);
-  
-  // Day of week for first day (0 = Sunday)
-  const firstDayOfWeek = firstDay.getDay();
-  
-  // Total days in month
-  const daysInMonth = lastDay.getDate();
-  
-  // Build calendar grid
-  const calendarArray = [];
-  let week = [];
-  
-  // Fill in empty cells before first day
-  for (let i = 0; i < firstDayOfWeek; i++) {
-    week.push(null);
-  }
-  
-  // Fill in days of month
-  for (let day = 1; day <= daysInMonth; day++) {
-    week.push(day);
-    
-    // Start new week when we reach Sunday or end of month
-    if ((firstDayOfWeek + day) % 7 === 0 || day === daysInMonth) {
-      calendarArray.push(week);
-      week = [];
-    }
-  }
-  
-  // Fill in empty cells at end if needed
-  if (week.length > 0) {
-    while (week.length < 7) {
-      week.push(null);
-    }
-    calendarArray.push(week);
-  }
-  
-  return calendarArray;
-});
-
-const goToPreviousMonth = () => {
-  const newDate = new Date(currentMonth.value);
-  newDate.setMonth(newDate.getMonth() - 1);
-  currentMonth.value = newDate;
-};
-
-const goToNextMonth = () => {
-  const newDate = new Date(currentMonth.value);
-  newDate.setMonth(newDate.getMonth() + 1);
-  currentMonth.value = newDate;
 };
 
 const handleLogout = () => {

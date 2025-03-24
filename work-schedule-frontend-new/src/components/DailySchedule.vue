@@ -37,8 +37,8 @@
       </button>
       
       <!-- Back to Schedule button -->
-      <button class="btn btn-secondary ms-2" @click="router.push('/schedules')">
-        <i class="bi bi-arrow-left"></i> Back to Schedule
+      <button class="btn btn-secondary ms-2" @click="router.push('/')">
+        <i class="bi bi-arrow-left"></i> Back to Dashboard
       </button>
     </div>
   </div>
@@ -67,30 +67,72 @@ const loading = ref(true);
 // Replace hard-coded data with an empty array that will be populated from API
 const dailySchedule = ref([]);
 
-// Function to fetch schedule data from API
+// Add this function before the fetchDailySchedule function
+
+// Helper function to format time
+const formatTime = (timeString) => {
+  if (!timeString) return 'N/A';
+  try {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    console.error('Error formatting time:', timeString, e);
+    return timeString || 'N/A';
+  }
+};
+
+// fetchDailySchedule function (corrected version):
+
 const fetchDailySchedule = async () => {
   loading.value = true;
   try {
-    // Format date as YYYY-MM-DD for API
-    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    // Format the date as YYYY-MM-DD
+    const dateString = selectedDate.value.toISOString().split('T')[0];
     
-    // Use your API service to fetch schedule data
-    const response = await api.scheduleApi.getScheduleById(formattedDate);
+    // Fetch schedules by date
+    const response = await api.scheduleApi.getSchedules({ date: dateString });
     
-    if (response.data && Array.isArray(response.data.tasks)) {
-      // Transform API data to match your component's structure
-      dailySchedule.value = response.data.tasks.map(task => ({
-        time: task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : '',
-        task: task.taskDescription || task.Task_Name,
-        priority: task.priority || 'normal'
-      }));
+    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+      // Find the schedule for the selected date
+      const todaysSchedule = response.data.find(schedule => {
+        const scheduleDate = schedule.Date || schedule.date;
+        if (!scheduleDate) return false;
+        
+        // Try different date formats for comparison
+        if (scheduleDate === dateString) return true;
+        if (scheduleDate.substring(0, 10) === dateString) return true;
+        
+        try {
+          const dateObj = new Date(scheduleDate);
+          const compareDate = new Date(dateString);
+          return dateObj.toDateString() === compareDate.toDateString();
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      if (todaysSchedule) {
+        // Process schedule data into task format for display
+        dailySchedule.value = todaysSchedule.tasks?.map(task => ({
+          time: `${formatTime(task.Start_Time || task.startTime)} - ${formatTime(task.End_Time || task.endTime)}`,
+          task: task.Task_Description || task.description || 'No description',
+          priority: task.Priority || task.priority || 'normal',
+          id: task.Task_Id || task.id
+        })) || [];
+      } else {
+        // No schedule found for this day
+        dailySchedule.value = [];
+      }
     } else {
-      // If no data, show empty array
+      // No schedules found
       dailySchedule.value = [];
     }
   } catch (error) {
     console.error('Failed to fetch schedule:', error);
-    dailySchedule.value = []; // Reset to empty on error
+    // Clear the schedule on error
+    dailySchedule.value = [];
   } finally {
     loading.value = false;
   }
@@ -98,6 +140,19 @@ const fetchDailySchedule = async () => {
 
 // Call this when component mounts
 onMounted(() => {
+  // Get date parameter from URL query
+  const urlParams = new URLSearchParams(window.location.search);
+  const dateParam = urlParams.get('date');
+  
+  if (dateParam) {
+    try {
+      // Parse the date parameter and set selectedDate
+      selectedDate.value = new Date(dateParam);
+    } catch (e) {
+      console.error('Invalid date parameter:', dateParam);
+      selectedDate.value = new Date();
+    }
+  }
   fetchDailySchedule();
 });
 

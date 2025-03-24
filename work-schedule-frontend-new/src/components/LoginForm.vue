@@ -36,8 +36,7 @@
       </button>
       
       <div class="register-link">
-        Don't have an account? 
-        <a href="#" @click.prevent="showRegisterForm">Register</a>
+        Registration will be available in a future version. 
       </div>
     </div>
   </div>
@@ -78,9 +77,7 @@ const login = async () => {
 };
 
 // Show register form (you can implement this later)
-const showRegisterForm = () => {
-  router.push('/register');
-};
+
 </script>
 
 <style scoped>
