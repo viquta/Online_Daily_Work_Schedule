@@ -47,9 +47,24 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   
+  // Add debugging to see what's happening
+  console.log('Route navigation:', { 
+    to: to.path, 
+    isAuthenticated: authStore.isAuthenticated 
+  });
+  
+  // If going to auth-required route but not authenticated
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    console.log('Redirecting to login - not authenticated');
     next('/login');
-  } else {
+  } 
+  // If going to login/register but already authenticated
+  else if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
+    console.log('Already authenticated, redirecting to dashboard');
+    next('/dashboard');
+  }
+  // Otherwise proceed normally
+  else {
     next();
   }
 });

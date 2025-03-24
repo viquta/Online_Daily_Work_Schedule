@@ -70,8 +70,11 @@
               </tbody>
             </table>
 
-            <div v-else class="alert alert-info">
-              No tasks scheduled for this day.
+            <div v-else class="alert alert-info text-center">
+              <p>No tasks scheduled for {{ formattedDate }}.</p>
+              <button class="btn btn-success mt-2" @click="createNewSchedule">
+                <i class="bi bi-plus-circle"></i> Create Schedule
+              </button>
             </div>
 
             <!-- Update the Add New Task button to navigate to the daily schedule editor -->
@@ -168,28 +171,123 @@ const loading = ref(false);
 const selectedDate = ref(new Date());
 const dailySchedule = ref([]);
 
-// Replace hardcoded data with API fetching
+// At the top of fetchDailySchedule
+console.log('scheduleApi methods:', Object.keys(api.scheduleApi));
+
 const fetchDailySchedule = async () => {
   loading.value = true;
   try {
     const formattedDate = selectedDate.value.toISOString().split('T')[0];
-    const response = await api.scheduleApi.getScheduleById(formattedDate);
+    console.log('Fetching schedule for date:', formattedDate);
     
-    if (response.data && Array.isArray(response.data.tasks)) {
-      dailySchedule.value = response.data.tasks.map(task => ({
-        time: task.startTime && task.endTime ? `${task.startTime} - ${task.endTime}` : '',
-        task: task.taskDescription || task.Task_Name,
-        priority: task.priority || 'normal'
+    // Debug: Check what API methods are available
+    console.log('API methods:', Object.keys(api));
+    
+    // For daily view - try these variations
+    const response = await api.scheduleApi.getSchedules({ date: formattedDate});
+
+    console.log('Raw response data:', response.data);
+    
+    // Transform the data to match your component's expected format
+    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+      // Filter for schedules matching today's date
+      console.log('Before filtering - schedules in response:', response.data.length);
+      console.log('Looking for date:', formattedDate);
+
+      const todaysSchedules = response.data.filter(schedule => {
+        // Try all possible date field names with flexible matching
+        const scheduleDate = schedule.Date || schedule.date;
+        
+        if (!scheduleDate) return false;
+        
+        // Log every schedule for debugging (keep existing logging)
+        console.log('Schedule:', {
+          id: schedule.WS_Id, 
+          date: scheduleDate,
+          match: scheduleDate === formattedDate,
+          includes: scheduleDate?.includes(formattedDate),
+          dateStart: scheduleDate?.substring(0, 10)
+        });
+        
+        // Try exact match
+        if (scheduleDate === formattedDate) return true;
+        
+        // Try substring match (for timestamps)
+        if (scheduleDate.substring(0, 10) === formattedDate) return true;
+        
+        // Try to compare actual date objects
+        try {
+          const dateObj = new Date(scheduleDate);
+          const compareDate = new Date(formattedDate);
+          return dateObj.toDateString() === compareDate.toDateString();
+        } catch (e) {
+          return false;
+        }
+      });
+
+      console.log('After filtering - found schedules:', todaysSchedules.length);
+      
+      if (todaysSchedules.length > 0) {
+  console.log(`Found ${todaysSchedules.length} schedules for today`);
+  
+  // Array to hold all tasks from all schedules
+  let allTasks = [];
+  
+  // Process each schedule for today
+  todaysSchedules.forEach(schedule => {
+    console.log('Processing schedule:', schedule.WS_Id);
+    
+    // Check for tasks in the schedule
+    if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
+      // Add these tasks to our collection
+      const scheduleTasks = schedule.tasks.map(task => ({
+        time: formatTime(schedule.Start_Time || schedule.startTime),
+        task: task.Task_Description || task.description || 'No description',
+        priority: getPriorityFromTask(task),
+        scheduleId: schedule.WS_Id // Add this so you know which schedule it came from
       }));
+      
+      allTasks = [...allTasks, ...scheduleTasks];
+    }
+  });
+  
+  // Sort all tasks by time
+  allTasks.sort((a, b) => {
+    return a.time.localeCompare(b.time);
+  });
+  
+  console.log(`Combined ${allTasks.length} tasks from all schedules`);
+  dailySchedule.value = allTasks;
+} else {
+  console.log('No schedule found for today in the data');
+  dailySchedule.value = [];
+}
     } else {
+      console.log('No schedule data returned from API');
       dailySchedule.value = [];
     }
   } catch (error) {
     console.error('Failed to fetch daily schedule:', error);
-    dailySchedule.value = [];
+    console.error('Error details:', error.response?.data || 'No error details');
+    dailySchedule.value = [];  // Empty array instead of null
   } finally {
     loading.value = false;
   }
+};
+
+// Helper function to determine priority
+const getPriorityFromTask = (task) => {
+  // Implement your priority logic based on task attributes
+  return 'normal';  // Default priority
+};
+
+// Helper function to format time
+const formatTime = (timeString) => {
+  if (!timeString) return 'N/A';
+  return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 // For monthly schedule
@@ -285,7 +383,9 @@ const goToNextDay = () => {
   selectedDate.value = newDate;
 };
 
-
+const createNewSchedule = () => {
+  router.push(`/daily-schedule?date=${selectedDate.value.toISOString().split('T')[0]}`);
+};
 
 const monthYear = computed(() => {
   return currentMonth.value.toLocaleDateString('en-US', {
