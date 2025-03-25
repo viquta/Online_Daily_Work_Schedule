@@ -43,7 +43,7 @@
     - Implemented keyboard shortcuts (Enter to save, Escape to cancel).
     - Connected cell edits to Pinia store for state management.
 
-## Problem 9: Frontend-Backend API Connection Issues
+## (copy paste to pranav...) Problem 9: Frontend-Backend API Connection Issues
 - **Description**: The frontend wasn't properly connecting to the backend API, resulting in failure to load tasks and save changes to schedules.
 - **Solution**: Fixed the API service export to include direct Axios methods alongside the specialized API objects:
   ```javascript
@@ -103,6 +103,15 @@ problems for the debug_and_cut... branch:
 -fix the daily schedule so that when viewing the tasks for the specific date, the correct tasks get shown, and not tasks from other days.
 - [done] in /dashboard --> "add new task" btn brings an error and there is "edit daily schedule" link which could  replaced it (at least for this version...)
     just took away the html code for the button lol
+
+
+
+
+
+
+
+
+
 
 
 
