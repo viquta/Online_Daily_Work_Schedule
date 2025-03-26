@@ -1,11 +1,23 @@
+//authController.js manages all authentication related operations such as login and logout.
+
 const User = require('../models/user');
 const { logAction } = require('../utils/auditLogger');
 
+//grouping auth functions together in the object authController --> organisation, readability, and maintainability
 const authController = {
   /**
    * Handle user login
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
+   */
+
+  /**
+   * The login function needs to "try":
+      1. Wait for database queries to complete
+      2. Wait for authentication verification
+      3. Wait for audit logging
+      4. Send response once all of these are complete 
+      (catch any errors)
    */
   async login(req, res) {
     try {
@@ -16,21 +28,24 @@ const authController = {
         return res.status(400).json({ error: 'Username and password are required' });
       }
 
-      // Verify credentials
+      // Verify credentials (security checkpoint)
       const user = await User.verifyCredentials(username, password);
       
       if (!user) {
         return res.status(401).json({ error: 'Invalid username or password' });
       }
 
-      // Set user info in session
-      req.session.userId = user.id;
-      req.session.userRole = user.role;
-      req.session.userName = `${user.firstName} ${user.lastName}`;
+      // Set user info in session (to persist info between http requests)
+      req.session.userId = user.id; //unique id
+      req.session.userRole = user.role; //controls access permissions
+      req.session.userName = `${user.firstName} ${user.lastName}`; //for display purposes
+      //don't i need user.status also?
 
-      // Log successful login
+      
+      // Log successful login (user.id is the unique identifier, LOGIN is a constant to indicate security type, `User ${username} logged in` is template string that contains the details of the user who logged in)
       await logAction(user.id, 'LOGIN', `User ${username} logged in`);
 
+      //send json reponse to the client: message + user info
       res.json({ 
         message: 'Login successful', 
         user: {

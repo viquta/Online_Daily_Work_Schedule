@@ -13,7 +13,7 @@ const User = {
         `SELECT c.*, u.* 
          FROM Credentials c
          JOIN Users u ON c.User_Id = u.Id
-         WHERE c.Username = ?`, //prevents sql injection --> ? is a placeholder
+         WHERE c.Username = ?`, //does this query make sql injections possible?
         [username]
       );
       
