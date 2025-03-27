@@ -93,10 +93,10 @@ const fetchDailySchedule = async () => {
     
     // Fetch schedules by date
     const response = await api.scheduleApi.getSchedules({ date: dateString });
-    
+    console.log(response);
     if (response.data && Array.isArray(response.data) && response.data.length > 0) {
       // Find the schedule for the selected date
-      const todaysSchedule = response.data.find(schedule => {
+      const todaysSchedule = response.data.filter(schedule => { //was find instead of filter
         const scheduleDate = schedule.Date || schedule.date;
         if (!scheduleDate) return false;
         
@@ -112,6 +112,8 @@ const fetchDailySchedule = async () => {
           return false;
         }
       });
+      console.log('After filtering - found schedules:', todaysSchedule.length);
+
       
       if (todaysSchedule) {
         // Process schedule data into task format for display

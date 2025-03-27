@@ -193,7 +193,7 @@ const Schedule = {
         taskId: taskId
       });
       
-      // Step 1: Check if there's a task with this WSTID in any schedule
+      // probably wrong query...
       const [taskInfo] = await db.query(
         'SELECT WS_Id FROM Work_Schedule_Tasks WHERE WSTID = ?',
         [taskId]
