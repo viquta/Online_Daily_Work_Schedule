@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import Login from '../components/LoginForm.vue';
-import Register from '../components/RegisterForm.vue';
 import Dashboard from '../components/Dashboard.vue';
 
 const routes = [
@@ -14,23 +13,14 @@ const routes = [
     name: 'login',
     component: Login
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: Register
-  },
+  
   {
     path: '/dashboard',
     name: 'dashboard',
     component: Dashboard,
     meta: { requiresAuth: true }
   },
-  {
-    path: '/schedules',
-    name: 'schedules',
-    component: () => import('../components/workScheduleTable.vue'),
-    meta: { requiresAuth: true }
-  },
+  
   {
     path: '/daily-schedule',
     name: 'dailySchedule',
