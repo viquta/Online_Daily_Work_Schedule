@@ -65,6 +65,32 @@ router.post('/', isAdminOrManager, async (req, res) => {
   }
 });
 
+// Add this new route to your taskRoutes.js file
+router.get('/schedule-id-by-task', async (req, res) => {
+  try {
+    const { wstid } = req.query;
+    
+    if (!wstid) {
+      return res.status(400).json({ error: 'Missing task ID (wstid) parameter' });
+    }
+    
+    // Query to find which schedule this task belongs to
+    const [rows] = await db.query(
+      'SELECT WS_Id FROM Work_Schedule_Tasks WHERE WSTID = ?',
+      [wstid]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    
+    res.json({ scheduleId: rows[0].WS_Id });
+  } catch (error) {
+    console.error('Error finding schedule ID for task:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get a specific task
 router.get('/:id', async (req, res) => {
   try {
@@ -175,5 +201,6 @@ router.get('/debug/schema', async (req, res) => {
     res.status(500).json({ error: 'Error fetching schema' });
   }
 });
+
 
 module.exports = router;

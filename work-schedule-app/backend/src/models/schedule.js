@@ -178,45 +178,50 @@ const Schedule = {
     }
   },
 
-  /**
-   * Remove a task from a schedule
-   * @param {number} scheduleId - The schedule ID
-   * @param {number} taskId - The task ID from the junction table (WSTID)
-   * @returns {Promise<boolean>} - True if deleted successfully
-   */
-  async removeTaskFromSchedule(scheduleId, taskId) {
-    try {
-      const [result] = await db.query(
-        'DELETE FROM Work_Schedule_Tasks WHERE WS_Id = ? AND WSTID = ?',
-        [scheduleId, taskId]
-      );
 
-      if (result.affectedRows === 0) {
-        throw new Error('Schedule task not found');
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error removing task from schedule:', error);
-      throw error;
-    }
-  },
 
   /**
    * Remove all tasks from a schedule
    * @param {number} scheduleId - The schedule ID
    * @returns {Promise<boolean>} - True if deleted successfully
    */
-  async removeAllTasksFromSchedule(scheduleId) {
+  async removeTaskFromSchedule(scheduleId, taskId) {
     try {
-      const [result] = await db.query(
-        'DELETE FROM Work_Schedule_Tasks WHERE WS_Id = ?',
-        [scheduleId]
+      // First, log what we're trying to delete
+      console.log('Attempting to delete task:', {
+        providedScheduleId: scheduleId,
+        taskId: taskId
+      });
+      
+      // Step 1: Check if there's a task with this WSTID in any schedule
+      const [taskInfo] = await db.query(
+        'SELECT WS_Id FROM Work_Schedule_Tasks WHERE WSTID = ?',
+        [taskId]
       );
-
+      
+      if (taskInfo.length === 0) {
+        throw new Error('Task not found in any schedule');
+      }
+      
+      // Step 2: Use the actual schedule ID from the database
+      const actualScheduleId = taskInfo[0].WS_Id;
+      
+      console.log(`Found task ${taskId} in schedule ${actualScheduleId} (client provided ${scheduleId})`);
+      
+      // Step 3: Delete the task using the correct schedule ID
+      const [result] = await db.query(
+        'DELETE FROM Work_Schedule_Tasks WHERE WS_Id = ? AND WSTID = ?',
+        [actualScheduleId, taskId]
+      );
+      
+      if (result.affectedRows === 0) {
+        throw new Error('Failed to delete task');
+      }
+      
+      console.log(`Successfully deleted task ${taskId} from schedule ${actualScheduleId}`);
       return true;
     } catch (error) {
-      console.error('Error removing all tasks from schedule:', error);
+      console.error('Error removing task from schedule:', error);
       throw error;
     }
   },
@@ -413,30 +418,7 @@ const Schedule = {
     }
   },
 
-  /**
-   * Save day update
-   * @param {Object} day - The day data
-   * @returns {Promise<void>}
-   */
-  async saveDayUpdate(day) {
-    try {
-      this.isSaving = true; // Add a loading state
-      
-      // Use your configured API instance with correct HTTP method
-      await api.put(`/schedules/${day.id}`, day);
-      
-      console.log('Day saved successfully');
-    } catch (error) {
-      console.error('Failed to save day:', error);
-      // Notify the user
-      alert('Failed to save changes. Please try again.');
-      
-      // Optionally reload the correct data
-      await this.fetchDaysForMonth(this.currentMonth, this.currentYear);
-    } finally {
-      this.isSaving = false;
-    }
-  },
+  
 
   /**
    * Get schedules by user and date
