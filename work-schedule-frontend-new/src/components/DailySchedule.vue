@@ -248,7 +248,7 @@ const goToNextDay = () => {
 };
 
 const addNewTask = async () => {
-  // Add a new empty task to the beginning of the array
+  // Add a new empty task to the UI
   const newTask = {
     time: '00:00 - 00:00', 
     task: 'New Task', 
@@ -259,26 +259,39 @@ const addNewTask = async () => {
   
   // Save to API
   try {
+    // First, get the schedule for today or create a new one if it doesn't exist
     const formattedDate = selectedDate.value.toISOString().split('T')[0];
-    await api.scheduleApi.addTaskToSchedule(formattedDate, {
-      startTime: '00:00',
-      endTime: '00:00',
-      taskDescription: 'New Task',
-      priority: 'normal'
+    
+    // Check if we already have a schedule loaded
+    let scheduleId;
+    const todaysSchedules = await api.scheduleApi.getSchedules({ date: formattedDate });
+    
+    if (todaysSchedules.data && todaysSchedules.data.length > 0) {
+      // Use existing schedule
+      scheduleId = todaysSchedules.data[0].WS_Id;
+    } else {
+      // Create a new schedule for today
+      const newSchedule = await api.scheduleApi.createSchedule({
+        date: formattedDate,
+        scheduleType: 'single',
+        tasks: [] // This needs to be adapted based on your backend requirements
+      });
+      scheduleId = newSchedule.data.WS_Id;
+    }
+    
+    // Now add the task to the schedule using the proper ID
+    await api.scheduleApi.addTaskToSchedule(scheduleId, {
+      taskId: 1, // You need to provide a valid task ID from your available tasks
+      description: 'New Task',
+      completionPercentage: 0,
+      notes: null
     });
+    
+    // Refresh the data
+    await fetchDailySchedule();
   } catch (error) {
     console.error('Failed to save new task:', error);
     // Could add error handling here
-  }
-  
-  // Refresh the table and immediately edit the new task
-  if (dataTable.value?.dt) {
-    dataTable.value.dt.clear().rows.add(tableOptions.value.data).draw();
-    
-    // Get the first row and trigger edit
-    setTimeout(() => {
-      editTask('New Task');
-    }, 50);
   }
 };
 
@@ -368,24 +381,35 @@ const saveRowChanges = async (index, $row) => {
   // Extract start and end times
   const [startTime, endTime] = newTime.split(' - ');
   
+  // Get the actual task ID from your data model
+  const taskId = dailySchedule.value[index].id;
+  
   // Save to API
   try {
     const formattedDate = selectedDate.value.toISOString().split('T')[0];
-    const taskId = index; // You may need to store actual task IDs in your data
-    await api.scheduleApi.updateScheduleTask(formattedDate, taskId, {
-      startTime,
-      endTime,
-      taskDescription: newTask,
-      priority: newPriority
-    });
+    
+    // Get the schedule ID first
+    const todaysSchedules = await api.scheduleApi.getSchedules({ date: formattedDate });
+    
+    if (todaysSchedules.data && todaysSchedules.data.length > 0) {
+      // Use the schedule ID from the response
+      const scheduleId = todaysSchedules.data[0].WS_Id || todaysSchedules.data[0].id;
+      
+      // Now update with proper IDs and field names
+      await api.scheduleApi.updateScheduleTask(scheduleId, taskId, {
+        startTime: startTime,
+        endTime: endTime,
+        description: newTask, // Use 'description' instead of 'taskDescription'
+        priority: newPriority
+      });
+      
+      // Refresh the data to ensure we have latest from server
+      await fetchDailySchedule();
+    } else {
+      console.error('No schedule found for date:', formattedDate);
+    }
   } catch (error) {
     console.error('Failed to update task:', error);
-    // Could add error handling here
-  }
-  
-  // Refresh the table
-  if (dataTable.value?.dt) {
-    dataTable.value.dt.clear().rows.add(tableOptions.value.data).draw();
   }
 };
 
@@ -403,22 +427,34 @@ const deleteTask = async (taskName) => {
     const index = dailySchedule.value.findIndex(item => item.task === taskName);
     
     if (index !== -1) {
-      // Remove from UI
-      dailySchedule.value.splice(index, 1);
+      // Get the actual task ID
+      const taskId = dailySchedule.value[index].id;
       
-      // Delete from API
       try {
         const formattedDate = selectedDate.value.toISOString().split('T')[0];
-        const taskId = index; // You may need to store actual task IDs
-        await api.scheduleApi.removeTaskFromSchedule(formattedDate, taskId);
+        
+        // Get the schedule ID first
+        const todaysSchedules = await api.scheduleApi.getSchedules({ date: formattedDate });
+        
+        if (todaysSchedules.data && todaysSchedules.data.length > 0) {
+          // Use the schedule ID from the response
+          const scheduleId = todaysSchedules.data[0].WS_Id || todaysSchedules.data[0].id;
+          
+          // Delete with proper IDs
+          await api.scheduleApi.removeTaskFromSchedule(scheduleId, taskId);
+          
+          // Remove from UI
+          dailySchedule.value.splice(index, 1);
+          
+          // Update the DataTable
+          if (dataTable.value?.dt) {
+            dataTable.value.dt.clear().rows.add(tableOptions.value.data).draw();
+          }
+        } else {
+          console.error('No schedule found for date:', formattedDate);
+        }
       } catch (error) {
         console.error('Failed to delete task:', error);
-        // Could add error handling or rollback UI change
-      }
-      
-      // Update the DataTable
-      if (dataTable.value?.dt) {
-        dataTable.value.dt.clear().rows.add(tableOptions.value.data).draw();
       }
     }
   }
