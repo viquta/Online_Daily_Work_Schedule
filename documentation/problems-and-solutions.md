@@ -93,15 +93,15 @@ Improved styling to highlight interactive elements
 
 
 problems for the debug_and_cut... branch:
--[done]edit the "register" button to say that register option will come in a later version 
--[done]take away monthly view (and montly button) + take away monthly task editing (keep only daily)
+-done:edit the "register" button to say that register option will come in a later version 
+-done:take away monthly view (and montly button) + take away monthly task editing (keep only daily)
         Removed the monthly view toggle buttons and replaced them with a simple "Daily View" label
         Eliminated all the monthly view code and layout from the template
         Removed all monthly-related functions and variables from the script section
         Kept only the daily schedule editing functionality
--[done]fix the "back to schedule" button after editing so that i go back to the dashboard and not get logged off 
+-done:fix the "back to schedule" button after editing so that i go back to the dashboard and not get logged off 
 -fix the daily schedule so that when viewing the tasks for the specific date, the correct tasks get shown, and not tasks from other days.
-- [done] in /dashboard --> "add new task" btn brings an error and there is "edit daily schedule" link which could  replaced it (at least for this version...)
+- done: in /dashboard --> "add new task" btn brings an error and there is "edit daily schedule" link which could  replaced it (at least for this version...)
     just took away the html code for the button lol
 
 
@@ -109,23 +109,7 @@ problems for the debug_and_cut... branch:
 
 
 
+problem: bloat  
+i realised that i had a lot of code that i was not using for my app so I deleted it.
 
-
-
-
-
-
-weird error from backend:
-Raw query results: []
-SQL executed: SELECT * FROM Work_Schedule WHERE WS_Id = 2025
-Total schedules in database: 18
-Error getting schedule by ID: Error: Schedule not found
-    at Object.getScheduleById (C:\Users\Victo\Documents\GitHub\Online_Work_Schedule2\work-schedule-app\backend\src\models\schedule.js:406:15)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async addTaskToSchedule (C:\Users\Victo\Documents\GitHub\Online_Work_Schedule2\work-schedule-app\backend\src\controllers\scheduleController.js:271:32)
-Error in addTaskToSchedule controller: Error: Schedule not found
-    at Object.getScheduleById (C:\Users\Victo\Documents\GitHub\Online_Work_Schedule2\work-schedule-app\backend\src\models\schedule.js:406:15)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async addTaskToSchedule (C:\Users\Victo\Documents\GitHub\Online_Work_Schedule2\work-schedule-app\backend\src\controllers\scheduleController.js:271:32)
-[2025-03-24T15:17:50.477Z] GET /api/schedules
-Session data: Session {
+problem: api dailyschedule: i realised that hte buttons to edit, delete, and add tasks on /dailyschedule don't respond and when they do, i get axios error
