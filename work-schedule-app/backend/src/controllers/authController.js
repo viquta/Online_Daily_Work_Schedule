@@ -37,11 +37,8 @@ const authController = {
 
       // Set user info in session (to persist info between http requests)
       req.session.userId = user.id; //unique id
-      req.session.userRole = user.role; //controls access permissions
       req.session.userName = `${user.firstName} ${user.lastName}`; //for display purposes
-      //don't i need user.status also?
-
-      
+     
       // Log successful login (user.id is the unique identifier, LOGIN is a constant to indicate security type, `User ${username} logged in` is template string that contains the details of the user who logged in)
       await logAction(user.id, 'LOGIN', `User ${username} logged in`);
 
@@ -52,7 +49,6 @@ const authController = {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
-          role: user.role
         } 
       });
     } catch (error) {
@@ -89,54 +85,6 @@ const authController = {
   },
 
   /**
-   * Register a new user
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   */
-  async register(req, res) {
-    try {
-      const { firstName, lastName, username, password, role = 'employee' } = req.body;
-
-      // Validate input
-      if (!firstName || !lastName || !username || !password) {
-        return res.status(400).json({ error: 'First name, last name, username, and password are required' });
-      }
-
-      // Check if username already exists
-      const existingUser = await User.findByUsername(username);
-      if (existingUser) {
-        return res.status(409).json({ error: 'Username already exists' });
-      }
-
-      // Create user
-      const user = await User.createUser({
-        firstName,
-        lastName,
-        username,
-        password,
-        role,
-        status: 'working'
-      });
-
-      // Log user creation
-      await logAction(user.id, 'USER_REGISTER', `New user registered: ${username}`);
-
-      res.status(201).json({
-        message: 'User registered successfully',
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role
-        }
-      });
-    } catch (error) {
-      console.error('Error in register controller:', error);
-      res.status(500).json({ error: 'An error occurred during registration', message: error.message });
-    }
-  },
-
-  /**
    * Get current user information
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
@@ -158,10 +106,9 @@ const authController = {
 
       res.json({
         id: user.Id,
-        firstName: user.First_Name,
-        lastName: user.Last_Name,
-        role: user.Role,
-        status: user.Status
+        firstName: user.firstName,
+        lastName: user.lastName,
+
       });
     } catch (error) {
       console.error('Error in getCurrentUser controller:', error);

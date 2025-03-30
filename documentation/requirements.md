@@ -32,3 +32,12 @@ Additional goals:
 - style of schedule
 - mobile responsiveness
  
+
+
+ Future requirements:
+ For a complete authentication system:
+
+        Password complexity requirements
+        Rate limiting for login attempts
+        Account locking after failed attempts
+        Password reset functionality

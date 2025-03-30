@@ -1,5 +1,26 @@
 
+┌─────────────┐     ┌─────────────────┐     ┌───────────┐     ┌──────────┐
+│  HTTP       │     │  auth.js        │     │  auth     │     │  user.js │
+│  Request    │───▶│  (Routes)        │───▶│  Controller│-─▶│  (Model) │
+│             │     │                 │     │           │     │          │
+└─────────────┘     └─────────────────┘     └───────────┘     └──────────┘
+                            │                      │                │
+                            │                      │                │
+                            ▼                      ▼                ▼
+                    ┌─────────────┐     ┌─────────────────┐     ┌──────────┐
+                    │  HTTP       │     │  Session        │     │ Database │
+                    │  Response   │◀────│  Management     │◀───│ Queries  │
+                    │             │     │                 │     │          │
+                    └─────────────┘     └─────────────────┘     └──────────┘
 
+
+
+
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│ Controllers │     │ Audit Logger│     │  Database   │
+│ (Auth/Task/ │────▶│   Utility   │────▶│ (audit_log  │
+│  Schedule)  │     │             │     │   table)    │
+└─────────────┘     └─────────────┘     └─────────────┘
 
 My prompt: 
     "I need to create business logic for my application.

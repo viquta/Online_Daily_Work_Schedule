@@ -33,3 +33,13 @@ CREATE TABLE tasks (
 );
 
 
+-- extra table to audit logging 
+-- Add audit logging table
+CREATE TABLE audit_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    details TEXT,
+    timestamp DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
