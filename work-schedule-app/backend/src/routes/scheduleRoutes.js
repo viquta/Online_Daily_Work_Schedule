@@ -9,7 +9,7 @@ const { authenticateUser } = require('../middleware/authMiddleware');
 // Schedule routes
 router.post('/', authenticateUser, scheduleController.createSchedule);
 router.get('/', authenticateUser, scheduleController.getUserSchedules);
-router.get('/date/:date', scheduleController.getSchedulesByDate);
+router.get('/date/:date', authenticateUser, scheduleController.getSchedulesByDate);
 router.get('/:id([0-9]+)', scheduleController.getScheduleById);  // Only match numeric IDs
 router.put('/:id', authenticateUser, scheduleController.updateSchedule);
 router.delete('/:id', authenticateUser, scheduleController.deleteSchedule);
@@ -19,7 +19,5 @@ router.post('/:id/tasks', authenticateUser, scheduleController.addTaskToSchedule
 router.put('/:scheduleId/tasks/:taskId', authenticateUser, scheduleController.updateScheduleTask);
 router.delete('/:scheduleId/tasks/:taskId', authenticateUser, scheduleController.removeTaskFromSchedule);
 
-// Mark month as ready for review
-router.post('/mark-month-ready', authenticateUser, scheduleController.markMonthAsReady);
 
 module.exports = router;

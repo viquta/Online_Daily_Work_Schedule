@@ -424,21 +424,59 @@ const Schedule = {
    * Get schedules by user and date
    * @param {number} userId - The user ID
    * @param {string} date - The date
-   * @returns {Promise<Array>} - List of schedules
+   * @returns {Promise<Array>} - List of schedules with tasks
    */
   async getSchedulesByUserAndDate(userId, date) {
     try {
-      const [schedules] = await db.query(
-        'SELECT * FROM Work_Schedule WHERE User_Id = ? AND Date = ?',
+      // Get all data in a single query with proper joins
+      const [rows] = await db.query(
+        `SELECT s.*, t.task_id, t.start_time, t.end_time, t.task_name, t.task_description
+         FROM schedules s
+         LEFT JOIN tasks t ON s.schedule_id = t.schedule_id
+         WHERE s.user_id = ? AND s.date = ?
+         ORDER BY t.start_time`,
         [userId, date]
       );
+      console.log('Raw rows from database:', rows);
+
+      if (!rows || rows.length === 0) {
+        return [];
+      }
       
-      return schedules;
+      // Group the rows by schedule_id to create the nested structure
+      const scheduleMap = {};
+      
+      rows.forEach(row => {
+        if (!scheduleMap[row.schedule_id]) {
+          // Initialize schedule
+          scheduleMap[row.schedule_id] = {
+            schedule_id: row.schedule_id,
+            user_id: row.user_id,
+            date: row.date,
+            tasks: []
+          };
+        }
+        
+        // Add task if not null
+        if (row.task_id) {
+          scheduleMap[row.schedule_id].tasks.push({
+            task_id: row.task_id,
+            start_time: row.start_time,
+            end_time: row.end_time,
+            task_name: row.task_name,
+            task_description: row.task_description
+          });
+        }
+      });
+      
+      const result = Object.values(scheduleMap);
+    console.log('Processed schedules with tasks:', JSON.stringify(result, null, 2));
+    
+    return result;
     } catch (error) {
       console.error('Error getting schedules by user and date:', error);
       throw error;
     }
-  },
-};
-
+  }
+}
 module.exports = Schedule;

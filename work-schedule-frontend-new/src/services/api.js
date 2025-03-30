@@ -22,6 +22,9 @@ api.interceptors.response.use(
 
 // Schedule-related API methods
 const scheduleApi = {
+  getSchedulesByDate(date) {
+    return api.get(`/schedules/date/${date}`);
+  },
   // Get all schedules with optional filters
   getSchedules(filters = {}) {
     return api.get('/schedules', { params: filters });

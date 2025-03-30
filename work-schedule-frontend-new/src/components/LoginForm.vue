@@ -68,7 +68,7 @@ const login = async () => {
     isLoading.value = true;
     
     await authStore.login(username.value, password.value);
-    router.push('/dashboard');
+    router.push('/schedule');
   } catch (err) {
     error.value = err.message || 'Failed to login. Please check your credentials.';
   } finally {
@@ -76,7 +76,7 @@ const login = async () => {
   }
 };
 
-// Show register form (you can implement this later)
+// Registration f(x) can be implemented here later
 
 </script>
 
