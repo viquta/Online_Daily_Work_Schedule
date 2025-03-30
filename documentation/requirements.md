@@ -6,7 +6,7 @@ i expect the app to do the following:
 
 
 
-For goal nr 1: 
+For goal nr 1: (done)
 - I need hashed password mecahnism (use bcrypt)
 - a session OR token so that the user can stay in their page
 - user credentials that are already in the database
