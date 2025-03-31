@@ -11,7 +11,6 @@ dotenv.config();
 // Import routes
 const authRoutes = require('./routes/auth');
 const scheduleRoutes = require('./routes/scheduleRoutes');
-const taskRoutes = require('./routes/taskRoutes');
 
 // Create Express app
 const app = express();
@@ -22,67 +21,71 @@ app.use(express.urlencoded({ extended: true }));
 
 // Configure CORS to work with credentials
 app.use(cors({
-  origin: 'http://localhost:5173', // Your Vue frontend URL (adjust as needed)
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true  // This is crucial for cookies to work
 }));
 
-// Update your session configuration
+// Session configuration
 app.use(session({
-  secret: 'your-secret-key', // Use a strong random secret in production
+  secret: process.env.SESSION_SECRET || 'your-secret-key', // Use env variable in production
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Required for cross-site cookies
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
-// Add this before your routes
+// Request logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-  console.log('Session data:', req.session);
+  
+  // Only log session userId in non-production for debugging
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Session userId:', req.session.userId || 'none');
+  }
+  
   next();
 });
 
-// Global error handler middleware
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/schedules', scheduleRoutes);
+
+// Development-only routes
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/test', (req, res) => {
+    res.json({ message: 'Basic test route working!' });
+  });
+  
+  app.post('/test-post', (req, res) => {
+    res.json({ message: 'Post test working!', body: req.body });
+  });
+  
+  app.get('/debug/session', (req, res) => {
+    res.json({ 
+      session: {
+        userId: req.session.userId,
+        userRole: req.session.userRole
+      }
+    });
+  });
+}
+
+// Catch 404
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' });
+});
+
+// Global error handler middleware - should be AFTER routes
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ 
     error: 'Internal Server Error', 
     message: process.env.NODE_ENV === 'development' ? err.message : undefined 
   });
-});
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/schedules', scheduleRoutes);
-app.use('/api/tasks', taskRoutes);
-
-// Add this right before the 404 handler
-app.get('/test', (req, res) => {
-  res.json({ message: 'Basic test route working!' });
-});
-
-// Add this near your existing test route
-app.post('/test-post', (req, res) => {
-  res.json({ message: 'Post test working!', body: req.body });
-});
-
-// Add this before your 404 handler
-app.get('/debug/session', (req, res) => {
-  res.json({ 
-    session: {
-      userId: req.session.userId,
-      userRole: req.session.userRole
-    }
-  });
-});
-
-// Catch 404
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not Found' });
 });
 
 // Start server

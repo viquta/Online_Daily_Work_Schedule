@@ -1,3 +1,4 @@
+<!-- filepath: c:\Users\Victo\Documents\GitHub\Online_Work_Schedule_2.0\work-schedule-frontend-new\src\components\Schedule.vue -->
 <template>
   <div class="container mt-4">
     <div class="card shadow">
@@ -39,7 +40,7 @@
         <div v-else-if="dailySchedule.length === 0" class="alert alert-info text-center">
           <p>No tasks scheduled for {{ formattedDate }}.</p>
           <button class="btn btn-success mt-2" @click="addNewTask">
-            <i class="bi bi-plus-circle"></i> Create Schedule
+            <i class="bi bi-plus-circle"></i> Create Schedule and Tasks
           </button>
         </div>
 
@@ -85,6 +86,40 @@
       </div>
     </div>
   </div>
+
+  <!-- Task Add Modal -->
+  <div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addTaskModalLabel">Add New Task</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="taskTime" class="form-label">Time</label>
+              <input type="time" class="form-control" id="taskTime" v-model="newTask.startTime" required>
+            </div>
+            <div class="mb-3">
+              <label for="taskName" class="form-label">Task Name</label>
+              <input type="text" class="form-control" id="taskName" v-model="newTask.taskName" 
+                    placeholder="Enter task name" required>
+            </div>
+            <div class="mb-3">
+              <label for="taskDescription" class="form-label">Description (Optional)</label>
+              <textarea class="form-control" id="taskDescription" v-model="newTask.taskDescription" 
+                       placeholder="Enter task description" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" @click="saveNewTask">Save Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -96,6 +131,7 @@ import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-bs5';
 import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 import $ from 'jquery';
+import { Modal } from 'bootstrap';
 
 // Initialize DataTables
 DataTable.use(DataTablesCore);
@@ -107,6 +143,12 @@ const editMode = ref(false);
 const selectedDate = ref(new Date());
 const dailySchedule = ref([]);
 const dataTable = ref(null);
+const taskModal = ref(null);
+const newTask = ref({
+  startTime: '',
+  taskName: '',
+  taskDescription: ''
+});
 
 // Helper function to format time
 const formatTime = (timeString) => {
@@ -129,40 +171,30 @@ const fetchDailySchedule = async () => {
     const formattedDate = selectedDate.value.toISOString().split('T')[0];
     console.log('Fetching schedule for date:', formattedDate);
     
-    // In the fetchDailySchedule function
-    const response = await api.scheduleApi.getSchedulesByDate(formattedDate);    
+    // Updated to use correct API method name
+    const response = await api.scheduleApi.getScheduleByDate(formattedDate);
     console.log('Raw response data:', response.data);
     
-    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      // Don't filter again - backend already filtered by date
-      const todaysSchedules = response.data;
+    if (response.data && response.data.tasks) {
+      // Process schedule with tasks
+      const schedule = response.data;
       
-      console.log('Found schedules for today:', todaysSchedules.length);
-      
-      if (todaysSchedules.length > 0) {
-        let allTasks = [];
+      if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
+        const scheduleTasks = schedule.tasks.map(task => ({
+          time: formatTime(task.start_time),
+          task: task.task_name || 'No name',
+          description: task.task_description || 'No description',
+          id: task.task_id,
+          scheduleId: schedule.schedule_id,
+          startTime: task.start_time,
+          endTime: task.end_time
+        }));
         
-        todaysSchedules.forEach(schedule => {
-          console.log('Processing schedule:', schedule.schedule_id || schedule.id);
-          
-          if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
-            const scheduleTasks = schedule.tasks.map(task => ({
-              time: formatTime(task.start_time),
-              task: task.task_name || 'No name',
-              description: task.task_description || 'No description',
-              id: task.task_id,
-              scheduleId: schedule.schedule_id,
-            }));
-            
-            allTasks = [...allTasks, ...scheduleTasks];
-          }
-        });
-        
-        allTasks.sort((a, b) => {
+        scheduleTasks.sort((a, b) => {
           return a.time.localeCompare(b.time);
         });
         
-        dailySchedule.value = allTasks;
+        dailySchedule.value = scheduleTasks;
       } else {
         dailySchedule.value = [];
       }
@@ -182,11 +214,8 @@ const tableOptions = computed(() => ({
   data: dailySchedule.value.map(item => [
     item.time,
     item.task,
-    item.description,
+    item.description || '',
     `<div class="action-buttons">
-      <button class="btn btn-sm btn-outline-primary me-1 btn-edit" data-task="${item.task}" data-id="${item.id}">
-        <i class="bi bi-pencil"></i> Edit
-      </button>
       <button class="btn btn-sm btn-outline-danger btn-delete" data-task="${item.task}" data-id="${item.id}">
         <i class="bi bi-trash"></i> Delete
       </button>
@@ -194,8 +223,9 @@ const tableOptions = computed(() => ({
   ]),
   columns: [
     { title: 'Time', width: '15%' },
-    { title: 'Task', width: '50%' },
-    { title: 'Actions', width: '20%' }
+    { title: 'Task', width: '45%' },
+    { title: 'Description', width: '25%' },
+    { title: 'Actions', width: '15%' }
   ],
   responsive: true,
   dom: 'frtip', // filter, processing indicator, table, information, pagination
@@ -236,12 +266,6 @@ const toggleEditMode = () => {
   // Initialize DataTable event handlers when switching to edit mode
   if (editMode.value) {
     setTimeout(() => {
-      $(document).off('click', '.btn-edit').on('click', '.btn-edit', function(e) {
-        const taskName = $(this).attr('data-task');
-        const taskId = $(this).attr('data-id');
-        editTask(taskName, taskId);
-      });
-      
       $(document).off('click', '.btn-delete').on('click', '.btn-delete', function(e) {
         const taskName = $(this).attr('data-task');
         const taskId = $(this).attr('data-id');
@@ -253,47 +277,70 @@ const toggleEditMode = () => {
 
 // Add new task
 const addNewTask = async () => {
+  // Reset the form
+  newTask.value = {
+    startTime: new Date().toTimeString().slice(0, 5), // Default to current time (HH:MM)
+    taskName: '',
+    taskDescription: ''
+  };
+  
+  // Open the modal
+  if (!taskModal.value) {
+    taskModal.value = new Modal(document.getElementById('addTaskModal'));
+  }
+  taskModal.value.show();
+};
+
+// Save new task from modal
+const saveNewTask = async () => {
   try {
-    const formattedDate = selectedDate.value.toISOString().split('T')[0];
-    
-    // Check if we already have a schedule loaded
-    let scheduleId;
-    const todaysSchedules = await api.scheduleApi.getSchedules({ date: formattedDate });
-    
-    if (todaysSchedules.data && todaysSchedules.data.length > 0) {
-      // Use existing schedule
-      scheduleId = todaysSchedules.data[0].WS_Id || todaysSchedules.data[0].id;
-    } else {
-      // Create a new schedule for today
-      const newSchedule = await api.scheduleApi.createSchedule({
-        date: formattedDate,
-        scheduleType: 'single',
-        tasks: []
-      });
-      scheduleId = newSchedule.data.WS_Id || newSchedule.data.id;
+    if (!newTask.value.startTime || !newTask.value.taskName) {
+      alert('Please enter a time and task name');
+      return;
     }
     
-    // Use the current time as default start time
-    const now = new Date();
-    const startTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const endTime = `${(now.getHours() + 1).toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const formattedDate = selectedDate.value.toISOString().split('T')[0];
+    
+    // Check if we already have a schedule
+    let scheduleId;
+    try {
+      const response = await api.scheduleApi.getScheduleByDate(formattedDate);
+      if (response.data && response.data.schedule_id) {
+        scheduleId = response.data.schedule_id;
+      }
+    } catch (error) {
+      console.log('No existing schedule found, will create a new one');
+    }
+    
+    // If no existing schedule, create a new one
+    if (!scheduleId) {
+      const newSchedule = await api.scheduleApi.createSchedule({
+        date: formattedDate
+      });
+      scheduleId = newSchedule.data.schedule_id;
+    }
+    
+    // Calculate end time (1 hour after start time)
+    const [hours, minutes] = newTask.value.startTime.split(':').map(Number);
+    const endHour = (hours + 1) % 24;
+    const endTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    
+    // Format start time
+    const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
     
     // Add task to schedule
     await api.scheduleApi.addTaskToSchedule(scheduleId, {
-      description: 'New Task',
+      taskName: newTask.value.taskName,
       startTime: startTime,
       endTime: endTime,
-      completionPercentage: 0,
-      notes: ''
+      taskDescription: newTask.value.taskDescription || ''
     });
+    
+    // Close the modal
+    taskModal.value.hide();
     
     // Refresh the data
     await fetchDailySchedule();
-    
-    // Switch to edit mode if not already in edit mode
-    if (!editMode.value) {
-      editMode.value = true;
-    }
     
   } catch (error) {
     console.error('Failed to save new task:', error);
@@ -330,7 +377,9 @@ const editTask = (taskName, taskId) => {
       const $taskCell = $row.find('td:eq(1)');
       $taskCell.html(`<input type="text" class="form-control form-control-sm edit-input" value="${rowData[1]}">`);
       
- 
+      // Replace description cell with input
+      const $descCell = $row.find('td:eq(2)');
+      $descCell.html(`<input type="text" class="form-control form-control-sm edit-input" value="${rowData[2]}">`);
       
       // Update action buttons
       const $actionsCell = $row.find('td:eq(3)');
@@ -362,34 +411,53 @@ const editTask = (taskName, taskId) => {
 
 // Save task changes
 const saveRowChanges = async (index, $row) => {
-  // Get values from inputs
-  const newTime = $row.find('td:eq(0) input').val();
-  const newTask = $row.find('td:eq(1) input').val();
-  
-  // Update data model
-  dailySchedule.value[index].time = newTime;
-  dailySchedule.value[index].task = newTask;
-  
-  // Extract start and end times
-  const [startTime, endTime] = newTime.split(' - ');
-  
-  // Get the actual task ID from your data model
-  const taskId = dailySchedule.value[index].id;
-  const scheduleId = dailySchedule.value[index].scheduleId;
-  
-  // Save to API
   try {
-    // Update with proper IDs and field names
-    await api.scheduleApi.updateScheduleTask(scheduleId, taskId, {
+    // Get values from inputs
+    const newTime = $row.find('td:eq(0) input').val();
+    const newTask = $row.find('td:eq(1) input').val();
+    const newDesc = $row.find('td:eq(2) input').val();
+    
+    // Get the task ID and scheduleId
+    const taskId = dailySchedule.value[index].id;
+    
+    // Since our backend doesn't support task updates yet, we'll need to:
+    // 1. Delete the old task
+    // 2. Create a new task with the updated information
+    
+    // First, delete the old task
+    await api.scheduleApi.removeTask(taskId);
+    
+    // Then create a new task with the updated information
+    const scheduleId = dailySchedule.value[index].scheduleId;
+    
+    // Format the time from "12:30 PM" to "12:30:00" format
+    let timeComponents = newTime.match(/(\d+):(\d+)\s*([AP]M)?/i);
+    let hours = parseInt(timeComponents[1]);
+    const minutes = parseInt(timeComponents[2]);
+    
+    // Handle AM/PM conversion
+    if (timeComponents[3] && timeComponents[3].toUpperCase() === 'PM' && hours < 12) {
+      hours += 12;
+    } else if (timeComponents[3] && timeComponents[3].toUpperCase() === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    
+    const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    const endTime = `${(hours + 1).toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    
+    // Add the new task
+    await api.scheduleApi.addTaskToSchedule(scheduleId, {
+      taskName: newTask,
       startTime: startTime,
       endTime: endTime,
-      description: newTask,
+      taskDescription: newDesc
     });
     
-    // Refresh the data to ensure we have latest from server
+    // Refresh data
     await fetchDailySchedule();
+    
   } catch (error) {
-    console.error('Failed to update task:', error);
+    console.error('Error updating task:', error);
     alert('Failed to update task. Please try again.');
   }
 };
@@ -406,24 +474,18 @@ const cancelEditing = () => {
 const deleteTask = async (taskName, taskId) => {
   if (confirm(`Are you sure you want to delete task: ${taskName}?`)) {
     try {
-      // Find the task in our local data to get the schedule ID
-      const task = dailySchedule.value.find(item => String(item.id) === String(taskId));
-      
-      if (!task) {
-        alert('Could not find the task. Please refresh and try again.');
-        return;
-      }
-      
-      const scheduleId = task.scheduleId;
+      console.log('Deleting task with ID:', taskId);
       
       // Call the API to delete the task
-      await api.scheduleApi.removeTaskFromSchedule(scheduleId, taskId);
+      await api.scheduleApi.removeTask(taskId);
       
       // Refresh the data
       await fetchDailySchedule();
+      
+      console.log('Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
-      alert(`Failed to delete task: ${error.message}. Please try again.`);
+      alert(`Failed to delete task. Please try again.`);
     }
   }
 };
