@@ -15,7 +15,7 @@ For goal nr 1: (done)
 
 For goal nr 2: 
 - I need to see the current schedule -->the database sends schedule for the correct date: 
-        If it's the 28th March 2025, then that schedule should be there and it should show the tasks (if there are any) 
+        DONE: If it's the 28th March 2025, then that schedule should be there and it should show the tasks (if there are any) 
             --> task properties: hh:mm time, task name, task description
         If no schedule for this date ? --> user presses "create schedule" --> database gets a query to INSERT a new schedule for that date
         If user wishes to go to a different date ? --> clickable left and right buttons for going to next date or previous date.
