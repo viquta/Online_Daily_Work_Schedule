@@ -22,29 +22,14 @@ api.interceptors.response.use(
 
 // Schedule-related API methods
 const scheduleApi = {
-  // Get all schedules with optional filters
-  getSchedules(filters = {}) {
-    return api.get('/schedules', { params: filters });
+  // Get schedule by date
+  getScheduleByDate(date) {
+    return api.get(`/schedules/date/${date}`);
   },
   
-  // Get a specific schedule by ID
-  getScheduleById(scheduleId) {
-    return api.get(`/schedules/${scheduleId}`);
-  },
-  
-  // Create a new schedule with tasks
+  // Create a new schedule
   createSchedule(scheduleData) {
     return api.post('/schedules', scheduleData);
-  },
-  
-  // Update an existing schedule
-  updateSchedule(scheduleId, scheduleData) {
-    return api.put(`/schedules/${scheduleId}`, scheduleData);
-  },
-  
-  // Delete a schedule
-  deleteSchedule(scheduleId) {
-    return api.delete(`/schedules/${scheduleId}`);
   },
   
   // Add a task to a schedule
@@ -52,32 +37,9 @@ const scheduleApi = {
     return api.post(`/schedules/${scheduleId}/tasks`, taskData);
   },
   
-  // Update a task in a schedule
-  updateScheduleTask(scheduleId, taskId, taskData) {
-    return api.put(`/schedules/${scheduleId}/tasks/${taskId}`, taskData);
-  },
-  
   // Remove a task from a schedule
-  removeTaskFromSchedule(scheduleId, taskId) {
-    return api.delete(`/schedules/${scheduleId}/tasks/${taskId}`);
-  },
-  
-  // Mark a month's schedules as ready for review
-  markMonthAsReady(month) {
-    return api.post('/schedules/mark-month-ready', { month });
-  }
-};
-
-// Task-related API methods
-const taskApi = {
-  // Get all available tasks
-  getTasks() {
-    return api.get('/tasks');
-  },
-  
-  // Get a specific task
-  getTaskById(taskId) {
-    return api.get(`/tasks/${taskId}`);
+  removeTask(taskId) {
+    return api.delete(`/schedules/tasks/${taskId}`);
   }
 };
 
@@ -102,7 +64,6 @@ const userApi = {
 // Add these Axios instance methods to your export
 export default {
   scheduleApi,
-  taskApi,
   userApi,
   // Direct Axios methods
   get: (url, config) => api.get(url, config),

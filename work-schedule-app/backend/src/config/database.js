@@ -1,18 +1,24 @@
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
+const path = require('path');  // Add this line to import the path module
 
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
+
 
 // Create a connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root', //work_user
+  user: process.env.DB_USER || 'work_user', //or 'root', but I gave the work_user all privileges to the database
   password: process.env.DB_PASSWORD || '', //password for work_user is 'a'
-  database: process.env.DB_NAME || 'work_schedule',
+  database: process.env.DB_NAME || 'daily_schedule',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  // Try supporting the GSSAPI authentication plugin
+  authPlugins: {
+    'auth_gssapi_client': () => () => Buffer.from(process.env.DB_PASSWORD || '')
+  }
 });
 
 // Test the connection

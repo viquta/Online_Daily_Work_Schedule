@@ -13,6 +13,19 @@
             "database": "work_schedule",
             "username": "work_user",
             "askForPassword": true
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "Daily Schedule",
+            "database": "daily_schedule",
+            "username": "work_user"
         }
     ]
 }

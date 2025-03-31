@@ -10,7 +10,7 @@ const db = require('../config/database');
 async function logAction(userId, actionType, actionDetails) {
   try {
     const [result] = await db.query(
-      "INSERT INTO Audit_Log (User_Id, Action, Details, Timestamp) VALUES (?, ?, ?, NOW())",
+      "INSERT INTO audit_log (user_id, action, details, timestamp) VALUES (?, ?, ?, NOW())",
       [userId, actionType, actionDetails]
     );
     return {
@@ -42,35 +42,35 @@ async function getAuditLogs(options = {}) {
     const { userId, actionType, startDate, endDate, limit = 100 } = options;
     
     let query = `
-      SELECT al.*, u.First_Name, u.Last_Name 
-      FROM Audit_Log al
-      JOIN Users u ON al.User_Id = u.Id
+      SELECT al.*, u.first_name, u.last_name 
+      FROM audit_log al
+      JOIN users u ON al.user_id = u.user_id
       WHERE 1=1
     `;
     
     const params = [];
     
     if (userId) {
-      query += ' AND al.User_Id = ?';
+      query += ' AND al.user_id = ?';
       params.push(userId);
     }
     
     if (actionType) {
-      query += ' AND al.Action = ?';
+      query += ' AND al.action = ?';
       params.push(actionType);
     }
     
     if (startDate) {
-      query += ' AND al.Timestamp >= ?';
+      query += ' AND al.timestamp >= ?';
       params.push(startDate);
     }
     
     if (endDate) {
-      query += ' AND al.Timestamp <= ?';
+      query += ' AND al.timestamp <= ?';
       params.push(endDate);
     }
     
-    query += ' ORDER BY al.Timestamp DESC LIMIT ?';
+    query += ' ORDER BY al.timestamp DESC LIMIT ?';
     params.push(limit);
     
     const [logs] = await db.query(query, params);

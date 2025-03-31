@@ -1,30 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import Login from '../components/LoginForm.vue';
-import Dashboard from '../components/Dashboard.vue';
+import Schedule from '../components/Schedule.vue'; // Add this import
 
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard'
+    redirect: '/schedule'  // Changed to redirect to the new schedule page
   },
   {
     path: '/login',
     name: 'login',
     component: Login
   },
-  
+
+
+  // Add the new Schedule route
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true }
-  },
-  
-  {
-    path: '/daily-schedule',
-    name: 'dailySchedule',
-    component: () => import('../components/DailySchedule.vue'),
+    path: '/schedule',
+    name: 'schedule',
+    component: Schedule,
     meta: { requiresAuth: true }
   }
 ];
@@ -49,9 +44,9 @@ router.beforeEach((to, from, next) => {
     next('/login');
   } 
   // If going to login/register but already authenticated
-  else if ((to.path === '/login' || to.path === '/register') && authStore.isAuthenticated) {
-    console.log('Already authenticated, redirecting to dashboard');
-    next('/dashboard');
+  else if ((to.path === '/login') && authStore.isAuthenticated) {
+    console.log('Already authenticated, redirecting to schedule');
+    next('/schedule');
   }
   // Otherwise proceed normally
   else {
