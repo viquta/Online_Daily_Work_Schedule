@@ -56,22 +56,28 @@ const password = ref('');
 const error = ref('');
 const isLoading = ref(false);
 
-// Login function
+// Login function 
 const login = async () => {
+  // Validate form inputs
   if (!username.value || !password.value) {
     error.value = 'Username and password are required';
     return;
   }
   
   try {
+    // Reset error and show loading state
     error.value = '';
     isLoading.value = true;
     
+    // Authenticate user through auth store
     await authStore.login(username.value, password.value);
+    // Navigate to schedule page on successful login
     router.push('/schedule');
   } catch (err) {
+    // Display authentication error to user
     error.value = err.message || 'Failed to login. Please check your credentials.';
   } finally {
+    // Reset loading state whether login succeeds or fails
     isLoading.value = false;
   }
 };

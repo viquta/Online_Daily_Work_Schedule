@@ -1,6 +1,6 @@
 # Online Daily Work Schedule
 
-An online application for managing work schedules efficiently.
+A simple page application that uses Vue for managing work schedules efficiently.
 
 ## Project Overview
 
@@ -51,18 +51,8 @@ npm install
 # Set up the database
 # 1. Install MariaDB
 # 2. Create a database
-# 3. Import the schema from ./database/schema.sql
+# 3. Import the schema from ./database/schema.sql and uncomment + run the INSERT users for \database\seed_data.sql (instructions in the document)
 # 4. Update your database.js and .env to match the user and database
-
-For example:
-    # Create database (after installing MariaDB)
-    mysql -u root -p
-    CREATE DATABASE work_schedule;
-    exit;
-
-    # Import schema
-    mysql -u root -p work_schedule < ./database/schema.sql
-
 
 # Start the backend
 cd ../work-schedule-app/backend

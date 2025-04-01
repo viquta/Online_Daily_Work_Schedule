@@ -246,13 +246,13 @@ const formattedDate = computed(() => {
   });
 });
 
-// Date navigation
+// previous day function
 const goToPreviousDay = () => {
   const newDate = new Date(selectedDate.value);
   newDate.setDate(newDate.getDate() - 1);
   selectedDate.value = newDate;
 };
-
+//next day function
 const goToNextDay = () => {
   const newDate = new Date(selectedDate.value);
   newDate.setDate(newDate.getDate() + 1);
@@ -279,16 +279,21 @@ const toggleEditMode = () => {
 const addNewTask = async () => {
   // Reset the form
   newTask.value = {
-    startTime: new Date().toTimeString().slice(0, 5), // Default to current time (HH:MM)
+    startTime: new Date().toTimeString().slice(0, 5),
     taskName: '',
     taskDescription: ''
   };
   
-  // Open the modal
-  if (!taskModal.value) {
-    taskModal.value = new Modal(document.getElementById('addTaskModal'));
+  // Open the modal safely
+  if (taskModal.value) {
+    taskModal.value.show();
+  } else {
+    const modalElement = document.getElementById('addTaskModal');
+    if (modalElement) {
+      taskModal.value = new Modal(modalElement);
+      taskModal.value.show();
+    }
   }
-  taskModal.value.show();
 };
 
 // Save new task from modal
@@ -336,8 +341,17 @@ const saveNewTask = async () => {
       taskDescription: newTask.value.taskDescription || ''
     });
     
-    // Close the modal
-    taskModal.value.hide();
+    // Close the modal safely
+    if (taskModal.value) {
+      taskModal.value.hide();
+    } else {
+      // Fallback if modal instance isn't available
+      const modalElement = document.getElementById('addTaskModal');
+      if (modalElement) {
+        const bsModal = Modal.getInstance(modalElement) || new Modal(modalElement);
+        bsModal.hide();
+      }
+    }
     
     // Refresh the data
     await fetchDailySchedule();
@@ -345,128 +359,6 @@ const saveNewTask = async () => {
   } catch (error) {
     console.error('Failed to save new task:', error);
     alert('Failed to create new task. Please try again.');
-  }
-};
-
-// Edit task (make row editable)
-const editTask = (taskName, taskId) => {
-  // Find the task index by ID
-  const index = dailySchedule.value.findIndex(item => String(item.id) === String(taskId));
-  
-  if (index !== -1 && dataTable.value?.dt) {
-    const dt = dataTable.value.dt;
-    const row = dt.row(function(idx, data) {
-      return data[1] === taskName;
-    });
-    
-    // Toggle editing state for this row
-    const $row = $(row.node());
-    
-    if ($row.hasClass('editing')) {
-      // Save the changes
-      saveRowChanges(index, $row);
-    } else {
-      // Enable editing - replace cells with input fields
-      const rowData = row.data();
-      
-      // Replace time cell with input
-      const $timeCell = $row.find('td:eq(0)');
-      $timeCell.html(`<input type="text" class="form-control form-control-sm edit-input" value="${rowData[0]}">`);
-      
-      // Replace task cell with input
-      const $taskCell = $row.find('td:eq(1)');
-      $taskCell.html(`<input type="text" class="form-control form-control-sm edit-input" value="${rowData[1]}">`);
-      
-      // Replace description cell with input
-      const $descCell = $row.find('td:eq(2)');
-      $descCell.html(`<input type="text" class="form-control form-control-sm edit-input" value="${rowData[2]}">`);
-      
-      // Update action buttons
-      const $actionsCell = $row.find('td:eq(3)');
-      $actionsCell.html(`
-        <div class="action-buttons">
-          <button class="btn btn-sm btn-success me-1 btn-save" data-task="${taskName}" data-id="${taskId}">
-            <i class="bi bi-check-lg"></i> Save
-          </button>
-          <button class="btn btn-sm btn-outline-secondary btn-cancel" data-task="${taskName}" data-id="${taskId}">
-            <i class="bi bi-x-lg"></i> Cancel
-          </button>
-        </div>
-      `);
-      
-      // Add event listeners for the new buttons
-      $actionsCell.find('.btn-save').on('click', function() {
-        saveRowChanges(index, $row);
-      });
-      
-      $actionsCell.find('.btn-cancel').on('click', function() {
-        cancelEditing();
-      });
-      
-      // Mark row as being edited
-      $row.addClass('editing');
-    }
-  }
-};
-
-// Save task changes
-const saveRowChanges = async (index, $row) => {
-  try {
-    // Get values from inputs
-    const newTime = $row.find('td:eq(0) input').val();
-    const newTask = $row.find('td:eq(1) input').val();
-    const newDesc = $row.find('td:eq(2) input').val();
-    
-    // Get the task ID and scheduleId
-    const taskId = dailySchedule.value[index].id;
-    
-    // Since our backend doesn't support task updates yet, we'll need to:
-    // 1. Delete the old task
-    // 2. Create a new task with the updated information
-    
-    // First, delete the old task
-    await api.scheduleApi.removeTask(taskId);
-    
-    // Then create a new task with the updated information
-    const scheduleId = dailySchedule.value[index].scheduleId;
-    
-    // Format the time from "12:30 PM" to "12:30:00" format
-    let timeComponents = newTime.match(/(\d+):(\d+)\s*([AP]M)?/i);
-    let hours = parseInt(timeComponents[1]);
-    const minutes = parseInt(timeComponents[2]);
-    
-    // Handle AM/PM conversion
-    if (timeComponents[3] && timeComponents[3].toUpperCase() === 'PM' && hours < 12) {
-      hours += 12;
-    } else if (timeComponents[3] && timeComponents[3].toUpperCase() === 'AM' && hours === 12) {
-      hours = 0;
-    }
-    
-    const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-    const endTime = `${(hours + 1).toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-    
-    // Add the new task
-    await api.scheduleApi.addTaskToSchedule(scheduleId, {
-      taskName: newTask,
-      startTime: startTime,
-      endTime: endTime,
-      taskDescription: newDesc
-    });
-    
-    // Refresh data
-    await fetchDailySchedule();
-    
-  } catch (error) {
-    console.error('Error updating task:', error);
-    alert('Failed to update task. Please try again.');
-  }
-};
-
-// Cancel editing
-const cancelEditing = () => {
-  // Refresh the table to discard changes
-  if (dataTable.value?.dt) {
-    dataTable.value.dt.clear().rows.add(tableOptions.value.data).draw();
   }
 };
 
@@ -500,6 +392,14 @@ const handleLogout = () => {
 onMounted(() => {
   // Fetch initial data
   fetchDailySchedule();
+  
+  // Initialize modal properly once DOM is ready
+  setTimeout(() => {
+    const modalElement = document.getElementById('addTaskModal');
+    if (modalElement) {
+      taskModal.value = new Modal(modalElement);
+    }
+  }, 100);
 });
 
 // Update data when date changes
@@ -663,23 +563,6 @@ table tbody tr:nth-child(even) {
   padding: 0.375rem 0.75rem;
 }
 
-/* Editing mode styles */
-:deep(tr.editing) {
-  background-color: rgba(52, 152, 219, 0.1) !important;
-}
-
-:deep(.edit-input) {
-  width: 100%;
-  padding: 4px 8px;
-  font-size: 0.875rem;
-  border: 1px solid #bdc3c7;
-  border-radius: 4px;
-}
-
-:deep(.form-select.edit-input) {
-  padding-right: 24px;
-}
-
 /* Modal styling */
 :deep(.modal-header) {
   background-color: #2c3e50;
@@ -690,6 +573,39 @@ table tbody tr:nth-child(even) {
 :deep(.modal-footer) {
   border-top: none;
   padding: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+:deep(.modal-footer .btn) {
+  min-width: 100px;
+}
+
+:deep(.modal-content) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.modal-body) {
+  padding: 1.5rem;
+}
+
+:deep(.form-label) {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+:deep(.form-control) {
+  padding: 0.625rem;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  transition: border-color 0.2s ease;
+}
+
+:deep(.form-control:focus) {
+  border-color: #3498db;
+  box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
 }
 
 /* Responsive adjustments */

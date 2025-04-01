@@ -99,4 +99,6 @@
 
 
 
-
+## Problem 15: Frontend: Organise tasks according to time
+- **Description**: Currently, the tasks in a schedule are not organised chronologically, but rather build downwards with each new task. 
+- **Solution**: Investigate both Schedule.vue (frontend) if there I could make a loop of some sorts with an "if taskx.time > tasky.time ?  put y before x"  and schedules.js (backend-logic) to see if the query orders the task in chronological order. 
