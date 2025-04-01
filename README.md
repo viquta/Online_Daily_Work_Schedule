@@ -67,9 +67,26 @@ npm run dev
 
 [Instructions on how to use the application]
 
-## Contributing
-
-[Guidelines for contributing to the project]
+## How my goals from phase 1 had changed in phase 2
+The aim for this project is to have a functioning work schedule – where a user can log in their time for
+work – on a web browser that is connected to a relational database. The intended user for this project
+is for a middle- to large-sized company (20 – hundreds of employees). The first dynamic aspect of the
+system is a log-in function that requires a work account and password. This user account will be part of
+the database. Second, is the actual work schedule where the user can log their working hours. It will be
+a table that has relevant columns and rows. This table will be indirectly connected to the database. The
+user interface (UI) will be responsive enough to adapt to browsers on mobile devices as well as
+desktops. The overall benefit of this online work schedule for the user is that they can log in for their
+working hours at any place and any device.
+For the frontend, the login page will be done with Vue.js or HTML, CSS, JavaScript, and an AJAX
+enabled table structure, such as jGrid or DataTables.js, will be in use. There will be custom CSS to
+make the table page responsive for mobile devices, in case jGrid or DataTabels.js does not have this
+feature. The user should be able to put in their data in the table without page reload. The backend will
+consist of Node.js, Express.js and a relational database. Node.js will keep the workload balance and
+server-side logic. Express.js will be used as a framework to make the connection between the frontend
+and the database secure. The database will hold user account information, and work schedule tables.
+Additionally, it should store structured data securely and should only respond to authorized backend
+requests to maintain referential integrity and uphold security. Hence, MariaDB would be a good starting
+choice
 
 ## License
 
