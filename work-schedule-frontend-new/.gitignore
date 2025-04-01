@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Add to your .gitignore
+cookies.txt
+admin_cookies.txt
