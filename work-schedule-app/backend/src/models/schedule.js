@@ -8,7 +8,7 @@ const Schedule = {
    */
   async createSchedule(scheduleData) {
     try {
-      const { userId, date } = scheduleData;
+      const { userId, date } = scheduleData; //I have specifically made the user_id and date a unique combination in my db for this purpose
 
       // Validate required fields
       if (!userId) {

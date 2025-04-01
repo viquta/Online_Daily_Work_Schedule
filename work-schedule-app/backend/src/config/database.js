@@ -1,5 +1,5 @@
-const mysql = require('mysql2/promise');
-const dotenv = require('dotenv');
+const mysql = require('mysql2/promise'); //client for mariadb --> this one allows me to use async/await and promise channing
+const dotenv = require('dotenv'); //let's me use .env
 const path = require('path');  // Add this line to import the path module
 
 // Load environment variables from .env file

@@ -1,4 +1,4 @@
-const Schedule = require('../models/schedule');
+const Schedule = require('../models/schedule'); // Import the Schedule model - models handle data logic and database interactions while controllers handle the request and response logic
 const { logAction } = require('../utils/auditLogger');
 
 const scheduleController = {
@@ -142,4 +142,5 @@ const scheduleController = {
   }
 };
 
-module.exports = scheduleController;
+module.exports = scheduleController; //nodejs module system
+// Export the scheduleController object

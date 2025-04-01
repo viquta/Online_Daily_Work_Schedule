@@ -100,5 +100,15 @@
 
 
 ## Problem 15: Frontend: Organise tasks according to time
-- **Description**: Currently, the tasks in a schedule are not organised chronologically, but rather build downwards with each new task. 
-- **Solution**: Investigate both Schedule.vue (frontend) if there I could make a loop of some sorts with an "if taskx.time > tasky.time ?  put y before x"  and schedules.js (backend-logic) to see if the query orders the task in chronological order. 
+- **Description**: Currently, the tasks in a schedule are not organised chronologically (the am and pm are not distinguished). 
+- **Solution**: Investigate both Schedule.vue (frontend) if there I could make a loop of some sorts with an "if time AM  ?  put before all PM times"  and schedules.js (backend-logic) to see if the query orders the task in chronological order. Or, maybe replace am and pm with a 24 hour time format
+- Fixed in frontend with replacing alphabetical sort to time sort (see scheduleTasks.sort in Schedule.vue)
+
+## Problem 16: Let other devices use the app (not only localhost)
+- **Description**: I think this is one of the final steps. 
+
+## Problem 17: Frontend not showing end time. --> Fixed functionality
+
+
+
+

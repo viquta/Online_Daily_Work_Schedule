@@ -1,6 +1,7 @@
 <!-- filepath: c:\Users\Victo\Documents\GitHub\Online_Work_Schedule_2.0\work-schedule-frontend-new\src\components\Schedule.vue -->
 <template>
-  <div class="container mt-4">
+  <!-- Change from container to container-fluid on larger screens -->
+  <div class="schedule-container mt-4">
     <div class="card shadow">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2>Work Schedule</h2>
@@ -48,9 +49,9 @@
         <table v-else-if="!editMode" class="table table-striped table-bordered">
           <thead class="bg-light">
             <tr>
-              <th style="width: 15%">Time</th>
+              <th style="width: 60%">Time</th>
               <th style="width: 65%">Task</th>
-              <th style="width: 20%">Description</th>
+              <th style="width: 50%">Description</th>
             </tr>
           </thead>
           <tbody>
@@ -98,9 +99,13 @@
         <div class="modal-body">
           <form>
             <div class="mb-3">
-              <label for="taskTime" class="form-label">Time</label>
-              <input type="time" class="form-control" id="taskTime" v-model="newTask.startTime" required>
-            </div>
+                <label for="taskTime" class="form-label">Start Time</label>
+                <input type="time" class="form-control" id="taskTime" v-model="newTask.startTime" required>
+              </div>
+              <div class="mb-3">
+                <label for="endTime" class="form-label">End Time</label>
+                <input type="time" class="form-control" id="endTime" v-model="newTask.endTime" required>
+              </div>
             <div class="mb-3">
               <label for="taskName" class="form-label">Task Name</label>
               <input type="text" class="form-control" id="taskName" v-model="newTask.taskName" 
@@ -146,6 +151,7 @@ const dataTable = ref(null);
 const taskModal = ref(null);
 const newTask = ref({
   startTime: '',
+  endTime: '',
   taskName: '',
   taskDescription: ''
 });
@@ -181,7 +187,7 @@ const fetchDailySchedule = async () => {
       
       if (schedule.tasks && Array.isArray(schedule.tasks) && schedule.tasks.length > 0) {
         const scheduleTasks = schedule.tasks.map(task => ({
-          time: formatTime(task.start_time),
+          time: `${formatTime(task.start_time)} - ${formatTime(task.end_time)}`, // Show both times
           task: task.task_name || 'No name',
           description: task.task_description || 'No description',
           id: task.task_id,
@@ -191,7 +197,8 @@ const fetchDailySchedule = async () => {
         }));
         
         scheduleTasks.sort((a, b) => {
-          return a.time.localeCompare(b.time);
+          // Compare the raw start_time values which are in 24-hour format (HH:MM:SS)
+          return a.startTime.localeCompare(b.startTime);
         });
         
         dailySchedule.value = scheduleTasks;
@@ -209,8 +216,10 @@ const fetchDailySchedule = async () => {
   }
 };
 
-// DataTable options
+// DataTable options (reactive component)
 const tableOptions = computed(() => ({
+  //data maps the schedule info into a format that DataTable can use
+  // each item in the array is an array of values for each column
   data: dailySchedule.value.map(item => [
     item.time,
     item.task,
@@ -222,13 +231,13 @@ const tableOptions = computed(() => ({
     </div>`
   ]),
   columns: [
-    { title: 'Time', width: '15%' },
-    { title: 'Task', width: '45%' },
-    { title: 'Description', width: '25%' },
-    { title: 'Actions', width: '15%' }
+    { title: 'Time', width: '35%' },
+    { title: 'Task', width: '15%' },
+    { title: 'Description', width: '40%' },
+    { title: 'Actions', width: '10%' }
   ],
-  responsive: true,
-  dom: 'frtip', // filter, processing indicator, table, information, pagination
+  responsive: true, //adapt to screen size
+  dom: 'frti', // filter, processing indicator, table, information, p for pagination
   language: {
     search: 'Search:',
     lengthMenu: 'Show _MENU_ entries per page',
@@ -277,9 +286,18 @@ const toggleEditMode = () => {
 
 // Add new task
 const addNewTask = async () => {
+  // Current time for start time
+  const currentTime = new Date().toTimeString().slice(0, 5);
+  
+  // Default end time (1 hour later)
+  const [hours, minutes] = currentTime.split(':').map(Number);
+  const endHour = (hours + 1) % 24;
+  const defaultEndTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  
   // Reset the form
   newTask.value = {
-    startTime: new Date().toTimeString().slice(0, 5),
+    startTime: currentTime,
+    endTime: defaultEndTime,  // Set default but user can change
     taskName: '',
     taskDescription: ''
   };
@@ -299,14 +317,15 @@ const addNewTask = async () => {
 // Save new task from modal
 const saveNewTask = async () => {
   try {
-    if (!newTask.value.startTime || !newTask.value.taskName) {
-      alert('Please enter a time and task name');
+    // Update validation to check for end time too
+    if (!newTask.value.startTime || !newTask.value.endTime || !newTask.value.taskName) {
+      alert('Please enter start time, end time, and task name');
       return;
     }
     
     const formattedDate = selectedDate.value.toISOString().split('T')[0];
     
-    // Check if we already have a schedule
+    // Keep all this schedule checking logic
     let scheduleId;
     try {
       const response = await api.scheduleApi.getScheduleByDate(formattedDate);
@@ -325,15 +344,15 @@ const saveNewTask = async () => {
       scheduleId = newSchedule.data.schedule_id;
     }
     
-    // Calculate end time (1 hour after start time)
-    const [hours, minutes] = newTask.value.startTime.split(':').map(Number);
-    const endHour = (hours + 1) % 24;
-    const endTime = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
-    
     // Format start time
-    const startTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+    const [startHours, startMinutes] = newTask.value.startTime.split(':').map(Number);
+    const startTime = `${startHours.toString().padStart(2, '0')}:${startMinutes.toString().padStart(2, '0')}:00`;
     
-    // Add task to schedule
+    // Format end time from user input
+    const [endHours, endMinutes] = newTask.value.endTime.split(':').map(Number);
+    const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}:00`;
+    
+    // Use the formatted times in API call
     await api.scheduleApi.addTaskToSchedule(scheduleId, {
       taskName: newTask.value.taskName,
       startTime: startTime,
@@ -416,6 +435,28 @@ watch(dailySchedule, () => {
 </script>
 
 <style scoped>
+/* Add this at the top of your style section */
+.schedule-container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Container sizing for different screens */
+@media (min-width: 992px) {
+  .schedule-container {
+    max-width: 90%; /* Wider container on desktop */
+  }
+}
+
+@media (min-width: 1200px) {
+  .schedule-container {
+    max-width: 85%; /* Even wider on large desktop */
+  }
+}
+
 /* Base card styling */
 .card {
   border-radius: 8px;
