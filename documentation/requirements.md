@@ -1,8 +1,10 @@
-i expect the app to do the following: 
+# Requirements for the Online Daily Workschedule
 
-1 user logs in with user name and password 
-2 user sees their schedule for the day AND they can click their way to go to other days
-3 user can add or delete tasks for the schedule for that day --> tasks get saved in database
+I expect the app to do the following: 
+
+#1 user logs in with user name and password 
+#2 user sees their schedule for the day AND they can click their way to go to other days
+#3 user can add or delete tasks for the schedule for that day --> tasks get saved in database
 
 
 

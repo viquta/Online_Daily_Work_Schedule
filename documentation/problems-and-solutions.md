@@ -54,6 +54,7 @@
     // Direct Axios methods
     get: (url, config) => api.get(url, config),
     post: (url, data, config) => api.post(url, data, config),
+  ```
 ## Problem 10: Missing Required Props in Component
 - **Description**: The `WorkScheduleTable` component required `month` and `year` props, but these weren't provided when navigating to the route, causing Vue warnings.
 - **Solution**: Added default prop values to use the current month and year when not explicitly provided:
@@ -69,47 +70,33 @@
     }
   });
   ```
-  year: {
-    type: Number,
-    default: () => new Date().getFullYear()
-  }
-})
 
+## Problem 11: No Tasks Available for Selection
+- **Description**: The task dropdown was empty, preventing users from assigning tasks to schedules.
+- **Solution**:
+  - Fixed the API connection to correctly fetch tasks
+  - Added sample task data to the database
+  - Ensured proper data format for task objects
 
-Problem 11: No Tasks Available for Selection
-Description: The task dropdown was empty, preventing users from assigning tasks to schedules.
-Solution:
-Fixed the API connection to correctly fetch tasks
-Added sample task data to the database
-Ensured proper data format for task objects
-Problem 12: Navigation and User Experience
-Description: Users needed a way to navigate between the dashboard and schedule editors, and clear feedback on editing capabilities.
-Solution:
-Added "Back to Dashboard" buttons for navigation
-Included visual indicators for editable cells
-Added help text to explain editing functionality
-Improved styling to highlight interactive elements
+## Problem 12: Navigation and User Experience
+- **Description**: Users needed a way to navigate between the dashboard and schedule editors, and clear feedback on editing capabilities.
+- **Solution**:
+  - Added "Back to Dashboard" buttons for navigation
+  - Included visual indicators for editable cells
+  - Added help text to explain editing functionality
+  - Improved styling to highlight interactive elements
 
+## Problem 13: Code Bloat
+- **Description**: I realized that I had a lot of code that was not being used for my app.
+- **Solution**: Performed code cleanup by identifying and removing unused functions, components, and dependencies to improve maintainability and performance.
 
-
-problems for the debug_and_cut... branch:
--done:edit the "register" button to say that register option will come in a later version 
--done:take away monthly view (and montly button) + take away monthly task editing (keep only daily)
-        Removed the monthly view toggle buttons and replaced them with a simple "Daily View" label
-        Eliminated all the monthly view code and layout from the template
-        Removed all monthly-related functions and variables from the script section
-        Kept only the daily schedule editing functionality
--done:fix the "back to schedule" button after editing so that i go back to the dashboard and not get logged off 
--fix the daily schedule so that when viewing the tasks for the specific date, the correct tasks get shown, and not tasks from other days.
-- done: in /dashboard --> "add new task" btn brings an error and there is "edit daily schedule" link which could  replaced it (at least for this version...)
-    just took away the html code for the button lol
+## Problem 14: Daily Schedule API Button Issues
+- **Description**: The buttons to edit, delete, and add tasks on the `/dailyschedule` route weren't responding correctly. When they did respond, I would get Axios errors.
+- **Solution**:  Investigating the API connection issues. Need to check if the API endpoints are correct and if the request payload is properly formatted. Also need to verify that the backend routes are properly handling these requests.
+- Creating the components diagram also helped immensely! See it here: documentation\frontendandbackend.drawio.png 
+- Going back to my requirements was also a pivotal part in this journey. See it here: documentation\requirements.md
 
 
 
 
 
-
-problem: bloat  
-i realised that i had a lot of code that i was not using for my app so I deleted it.
-
-problem: api dailyschedule: i realised that hte buttons to edit, delete, and add tasks on /dailyschedule don't respond and when they do, i get axios error
