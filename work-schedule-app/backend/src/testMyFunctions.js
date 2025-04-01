@@ -90,6 +90,7 @@ async function testTableStructure() {
 testTableStructure(); //test success
 */
 
+/*
 
 //verifycredentials fx --> success!
  async function testVerifyCredentials(a, b) {
@@ -115,3 +116,4 @@ testTableStructure(); //test success
 };
 
 testVerifyCredentials('testuser1', 'a');
+*/

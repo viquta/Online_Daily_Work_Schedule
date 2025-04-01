@@ -26,3 +26,5 @@
 - **Actual Result**: Successful connection to the database.
 - **Status**: Passed
 
+
+See other tests I did here: work-schedule-app\backend\src\testMyFunctions.js

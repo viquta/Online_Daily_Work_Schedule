@@ -11,6 +11,3 @@
 
 ## bcrypt
 - **Purpose**: For hashing passwords.
-
-## jsonwebtoken
-- **Purpose**: For generating and verifying JWT tokens.
