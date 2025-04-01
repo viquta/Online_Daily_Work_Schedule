@@ -19,7 +19,7 @@
       </div>
       <div class="card-body">
         <!-- Date Navigation -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="date-navigation d-flex justify-content-between align-items-center mb-4">
           <button class="btn btn-outline-secondary" @click="goToPreviousDay">
             <i class="bi bi-chevron-left"></i> Previous Day
           </button>
@@ -516,26 +516,127 @@ watch(dailySchedule, () => {
 </script>
 
 <style scoped>
+/* Base card styling */
 .card {
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
 }
 
 .card-header {
-  background-color: #f8f9fa;
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem;
+  border-bottom: none;
 }
 
-.badge {
-  font-size: 0.8rem;
-  padding: 0.35em 0.65em;
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Button styling */
+.btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #2980b9;
+  border-color: #2980b9;
+}
+
+.btn-outline-primary {
+  color: #3498db;
+  border-color: #3498db;
+}
+
+.btn-outline-primary:hover, .btn-outline-primary:focus {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-success {
+  background-color: #27ae60;
+  border-color: #27ae60;
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: #219955;
+  border-color: #219955;
+}
+
+.btn-outline-danger {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-outline-secondary {
+  color: #7f8c8d;
+  border-color: #7f8c8d;
+}
+
+.btn-outline-secondary:hover, .btn-outline-secondary:focus {
+  background-color: #7f8c8d;
+  color: white;
+}
+
+/* Date navigation */
+.date-navigation {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Table styling */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+table thead {
+  background-color: #34495e;
+  color: white;
+}
+
+table th {
+  padding: 0.75rem !important;
+  font-weight: 600;
 }
 
 table td {
   vertical-align: middle;
+  padding: 0.75rem !important;
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: #f8f9fa;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #ffffff;
 }
 
 .action-buttons {
   display: flex;
   justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Empty state styling */
+.alert-info {
+  background-color: #eef7fb;
+  border-color: #3498db;
+  color: #2c3e50;
 }
 
 /* DataTables custom styling */
@@ -556,18 +657,84 @@ table td {
   padding-top: 1rem;
 }
 
+:deep(.dataTables_filter input) {
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+}
+
 /* Editing mode styles */
 :deep(tr.editing) {
-  background-color: rgba(0, 123, 255, 0.05) !important;
+  background-color: rgba(52, 152, 219, 0.1) !important;
 }
 
 :deep(.edit-input) {
   width: 100%;
   padding: 4px 8px;
   font-size: 0.875rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
 }
 
 :deep(.form-select.edit-input) {
   padding-right: 24px;
+}
+
+/* Modal styling */
+:deep(.modal-header) {
+  background-color: #2c3e50;
+  color: white;
+  border-bottom: none;
+}
+
+:deep(.modal-footer) {
+  border-top: none;
+  padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 1rem;
+  }
+  
+  .card-header h2 {
+    text-align: center;
+    margin-bottom: 0;
+  }
+  
+  .card-header div {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .date-navigation h3 {
+    font-size: 1.25rem;
+  }
+  
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+  }
+  
+  :deep(.dataTables_filter) {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  :deep(.dataTables_filter input) {
+    width: 100%;
+  }
 }
 </style>
