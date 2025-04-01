@@ -73,9 +73,6 @@ cd ../../work-schedule-frontend-new
 npm run dev
 ```
 
-
-![Test connection to database](documentation\testing_and_reports\test2_database_connection.png "Test Connection to Database")
-
 ## Usage
 
 [Instructions on how to use the application]
