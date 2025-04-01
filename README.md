@@ -63,10 +63,6 @@ For example:
     # Import schema
     mysql -u root -p work_schedule < ./database/schema.sql
 
-Something like this: 
-![Test connection to database](documentation\testing_and_reports\test2_database_connection.png "Test Connection to Database")
-
-
 
 # Start the backend
 cd ../work-schedule-app/backend
@@ -76,6 +72,9 @@ npm start
 cd ../../work-schedule-frontend-new
 npm run dev
 ```
+
+
+![Test connection to database](documentation\testing_and_reports\test2_database_connection.png "Test Connection to Database")
 
 ## Usage
 
