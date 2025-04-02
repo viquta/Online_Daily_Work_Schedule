@@ -9,11 +9,11 @@ dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 // Create a connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'work_user', //or 'root', but I gave the work_user all privileges to the database
-  password: process.env.DB_PASSWORD || '', //password for work_user is 'a'
-  database: process.env.DB_NAME || 'daily_schedule',
+  user: process.env.DB_USER || 'your_db_user_name', //or 'root', but I gave the db_user all privileges to the database
+  password: process.env.DB_PASSWORD || '', //password 
+  database: process.env.DB_NAME || 'your_db_name',
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 10, //here you can probably increase it if you want more users
   queueLimit: 0,
   // Try supporting the GSSAPI authentication plugin
   authPlugins: {
