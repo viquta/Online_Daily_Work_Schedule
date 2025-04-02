@@ -78,5 +78,4 @@ The technology stack remained largely consistent with the initial plan, utilizin
 The main difference lies in the scale and specific features. Phase 1 envisioned a more complex system for a larger organization, while Phase 2 prioritized a streamlined, functional application for individual use. Future development could revisit the multi-user aspect and expand on the authentication system with features like password complexity requirements, accounts integrated with an Active Directory from Windows, and using MSSQL instead of MariaDB to fit in a corporate context.
 
 ## License
-
-[License information]
+MIT License 
