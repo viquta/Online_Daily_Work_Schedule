@@ -35,7 +35,7 @@ This is my third attempt at creating an online work scheduling system. The first
 
 ```bash
 # Clone the repository
-git clone https://github.com/viquta/Online_Daily_WorkSchedule.git
+git clone https://github.com/viquta/Online_Daily_Work_Schedule.git
 
 # Navigate to the project directory
 cd Online_Work_Schedule_2.0
@@ -62,6 +62,7 @@ npm start
 cd ../../work-schedule-frontend-new
 npm run dev
 ```
+And just like that, you have a running daily scheudle app on your local host! 
 
 ## Usage
 
