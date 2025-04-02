@@ -50,8 +50,8 @@ npm install
 
 # Set up the database
 # 1. Install MariaDB
-# 2. Create a database
-# 3. Import the schema from ./database/schema.sql and uncomment + run the INSERT users for \database\seed_data.sql (instructions in the document)
+# 2. Create a database and a user (not recommending root), also if you are having trouble with this, just watch some tutorials or google
+# 3. Import or run the schema from ./database/schema.sql and uncomment + run the INSERT users for \database\seed_data.sql (more instructions in that document)
 # 4. Update your database.js and .env to match the user and database
 
 # Start the backend
