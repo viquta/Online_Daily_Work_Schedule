@@ -65,8 +65,7 @@ npm run dev
 
 ## Usage
 
-![Uploading draft_phase2.pptx - PowerPoint 02_04_2025 10_43_13.png…]()
-
+![App Screenshot](https://github.com/viquta/Online_Daily_WorkSchedule/blob/main/documentation/draft_phase2.pptx%20-%20PowerPoint%2002_04_2025%2010_43_13.png)
 
 ### How my goals from phase 1 had changed in phase 2
 
