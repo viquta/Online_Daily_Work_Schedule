@@ -65,7 +65,8 @@ npm run dev
 
 ## Usage
 
-[Instructions on how to use the application]
+![Uploading draft_phase2.pptx - PowerPoint 02_04_2025 10_43_13.png…]()
+
 
 ### How my goals from phase 1 had changed in phase 2
 
