@@ -22,7 +22,7 @@ This is my third attempt at creating an online work scheduling system. The first
 ## Technologies Used
 
 - **Frontend**: Vue.js 3, Bootstrap 5, Pinia, DataTables
-- **Backend**: Node.js, Express.js
+- **Backend**: Node.js, Express.js, CORS
 - **Database**: MariaDB
 - **Authentication**: Express Sessions, bcrypt
 - **Build Tools**: Vite
