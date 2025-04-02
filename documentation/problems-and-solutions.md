@@ -43,7 +43,7 @@
     - Implemented keyboard shortcuts (Enter to save, Escape to cancel).
     - Connected cell edits to Pinia store for state management.
 
-## (copy paste to pranav...) Problem 9: Frontend-Backend API Connection Issues
+## Problem 9: Frontend-Backend API Connection Issues
 - **Description**: The frontend wasn't properly connecting to the backend API, resulting in failure to load tasks and save changes to schedules.
 - **Solution**: Fixed the API service export to include direct Axios methods alongside the specialized API objects:
   ```javascript
@@ -105,7 +105,7 @@
 - Fixed in frontend with replacing alphabetical sort to time sort (see scheduleTasks.sort in Schedule.vue)
 
 ## Problem 16: Let other devices use the app (not only localhost)
-- **Description**: I think this is one of the final steps. 
+- **Description**: I think this is one of the final steps. --> i made a branch for that and it is working with 0.0.0.0 port..
 
 ## Problem 17: Frontend not showing end time. --> Fixed functionality
 
