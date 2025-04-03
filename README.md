@@ -47,6 +47,7 @@ npm install
 # Install frontend dependencies
 cd ../../work-schedule-frontend-new
 npm install
+# probably install vue-router also (i had to do this with my linux)
 
 # Set up the database
 # 1. Install MariaDB
@@ -55,11 +56,11 @@ npm install
 # 4. Update your database.js and .env to match the user and database
 
 # Start the backend
-cd ../work-schedule-app/backend
+cd work-schedule-app/backend
 npm start
 
 # Start the frontend (in a new terminal)
-cd ../../work-schedule-frontend-new
+cd work-schedule-frontend-new
 npm run dev
 ```
 And just like that, you have a running daily scheudle app on your local host! 
