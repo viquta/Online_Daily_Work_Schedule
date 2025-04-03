@@ -63,6 +63,15 @@ npm start
 cd work-schedule-frontend-new
 npm run dev
 ```
+How your .env file could look like: 
+```bash
+# Database configuration
+DB_HOST=127.0.0.1
+DB_PORT=3001
+DB_NAME=work_schedule
+DB_USER=your_username
+DB_PASSWORD=your_password_for_the_database
+```
 And just like that, you have a running daily scheudle app on your local host! 
 
 ## Usage
