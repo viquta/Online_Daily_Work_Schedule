@@ -17,7 +17,7 @@ CREATE TABLE schedules (
     user_id INT,
     date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    UNIQUE (user_id, date) --ensures this combination remains unique because I want to allow only one schedule per user per day
+    UNIQUE (user_id, date) -- (take this comment away before running sql)ensures this combination remains unique because I want to allow only one schedule per user per day
 );
 
 --tasks and schedules have a 1:N relationship, meaning one schedule can have many tasks but one task can only belong to one schedule
@@ -25,7 +25,7 @@ CREATE TABLE schedules (
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     schedule_id INT NOT NULL,
-    start_time TIME NOT NULL, --should be hh:mm:ss format but the seconds will be set to 0 by default probably
+    start_time TIME NOT NULL, --(take this comment away before running sql)should be hh:mm:ss format but the seconds will be set to 0 by default probably
     end_time TIME NOT NULL,
     task_name VARCHAR(100) NOT NULL,
     task_description TEXT,
