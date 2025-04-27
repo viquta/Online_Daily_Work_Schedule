@@ -53,7 +53,8 @@ npm install
 # 1. Install MariaDB
 # 2. Create a database and a user (not recommending root), also if you are having trouble with this, just watch some tutorials or google
 # 3. Import or run the schema from ./database/schema.sql and uncomment + run the INSERT users for \database\seed_data.sql (more instructions in that document)
-# 4. Update your database.js and .env to match the user and database
+# 4. Create a `.env` file in the project root directory (`Online_Daily_Work_Schedule/`). Copy the example below into this file and update the values (DB_USER, DB_PASSWORD, etc.) to match your database setup.
+# 5. Update your `work-schedule-app/backend/src/config/database.js` file if necessary (though it should read from the `.env` file by default).
 
 # Start the backend
 cd work-schedule-app/backend
@@ -72,6 +73,22 @@ DB_NAME=work_schedule
 DB_USER=your_username
 DB_PASSWORD=your_password_for_the_database
 ```
+
+
+How it can look like on the terminal to put in your database and user
+```bash
+MariaDB [(none)]> CREATE DATABASE work_schedule;
+Query OK, 1 row affected (0.002 sec)
+
+MariaDB [(none)]> CREATE USER 'work_user'@'localhost' IDENTIFIED BY 'yourpasswordofchoice';
+Query OK, 0 rows affected (0.010 sec)
+
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON work_schedule.* TO 'work_user'@'localhost';FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.009 sec)
+
+Query OK, 0 rows affected (0.001 sec)
+
+```
 And just like that, you have a running daily scheudle app on your local host! 
 
 ## Usage
@@ -89,4 +106,4 @@ The technology stack remained largely consistent with the initial plan, utilizin
 The main difference lies in the scale and specific features. Phase 1 envisioned a more complex system for a larger organization, while Phase 2 prioritized a streamlined, functional application for individual use. Future development could revisit the multi-user aspect and expand on the authentication system with features like password complexity requirements, accounts integrated with an Active Directory from Windows, and using MSSQL instead of MariaDB to fit in a corporate context.
 
 ## License
-MIT License 
+MIT License

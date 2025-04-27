@@ -134,7 +134,7 @@ import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import DataTable from 'datatables.net-vue3';
 import DataTablesCore from 'datatables.net-bs5';
-import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css'; //responsive app...
 import $ from 'jquery';
 import { Modal } from 'bootstrap';
 
@@ -236,7 +236,7 @@ const tableOptions = computed(() => ({
     { title: 'Description', width: '40%' },
     { title: 'Actions', width: '10%' }
   ],
-  responsive: true, //adapt to screen size
+  responsive: true, //adapt to screen size --> responsive
   dom: 'frti', // filter, processing indicator, table, information, p for pagination
   language: {
     search: 'Search:',
@@ -649,7 +649,7 @@ table tbody tr:nth-child(even) {
   box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments --> max-width 768px */
 @media (max-width: 768px) {
   .card-header {
     flex-direction: column;
