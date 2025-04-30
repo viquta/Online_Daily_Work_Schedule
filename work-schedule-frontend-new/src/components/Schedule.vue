@@ -49,8 +49,8 @@
         <table v-else-if="!editMode" class="table table-striped table-bordered">
           <thead class="bg-light">
             <tr>
-              <th style="width: 60%">Time</th>
-              <th style="width: 65%">Task</th>
+              <th style="width: 35%">Time</th>
+              <th style="width: 15%">Task</th>
               <th style="width: 50%">Description</th>
             </tr>
           </thead>
@@ -93,10 +93,10 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="addTaskModalLabel">Add New Task</h5>
+           <h5 class="modal-title" id="addTaskModalLabel">Add New Task</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
+        </div>  
+        <div class="modal-body">  
           <form>
             <div class="mb-3">
                 <label for="taskTime" class="form-label">Start Time</label>
@@ -196,10 +196,21 @@ const fetchDailySchedule = async () => {
           endTime: task.end_time
         }));
         
+     //updated sorting of tasks by changing their values to numbers 
         scheduleTasks.sort((a, b) => {
           // Compare the raw start_time values which are in 24-hour format (HH:MM:SS)
-          return a.startTime.localeCompare(b.startTime);
+          // Convert time strings to Date objects for proper comparison
+          const timeA = new Date(`1970-01-01T${a.startTime}`);
+          const timeB = new Date(`1970-01-01T${b.startTime}`);
+          return timeA - timeB;
         });
+        
+      //old version of scheduleTasks.sort(a b)
+        //scheduleTasks.sort((a, b) => {
+          // Compare the raw start_time values which are in 24-hour format (HH:MM:SS)
+          //return a.startTime.localeCompare(b.startTime);
+        //});
+        
         
         dailySchedule.value = scheduleTasks;
       } else {
@@ -447,13 +458,13 @@ watch(dailySchedule, () => {
 /* Container sizing for different screens */
 @media (min-width: 992px) {
   .schedule-container {
-    max-width: 90%; /* Wider container on desktop */
+    max-width: 95%; /* Wider container on desktop */
   }
 }
 
 @media (min-width: 1200px) {
   .schedule-container {
-    max-width: 85%; /* Even wider on large desktop */
+    max-width: 90%; /* Even wider on large desktop */
   }
 }
 
