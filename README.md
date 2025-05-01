@@ -4,7 +4,7 @@ A simple page application that uses Vue for managing work schedules efficiently.
 
 ## Project Overview
 
-This is my third iteration at creating an online work scheduling system. The first attempt lacked a proper gitignore file, and in the second attempt, I wanted too many features (so I got lost in the process). In this third attmempt, I managed to create a simple yet reliable daily schedule for individual users. The server is by default setup to manage up to 10 users but I think that this can be increased. 
+This is my third iteration at creating an online work scheduling system. The first attempt lacked a proper gitignore file, and in the second attempt, I wanted too many features (so I got lost in the process). In this third attmempt, I managed to create a simple yet reliable daily schedule for individual users. The server is by default setup to manage up to 10 users but I think that this can be increased.
 
 ## Why This Project Uses a Database
 
@@ -17,7 +17,7 @@ This is my third iteration at creating an online work scheduling system. The fir
 
 - [Feature 1] Login and log out with encrypted password
 - [Feature 2] Daily schedule view per user per date
-- [Feature 3] Add and delete tasks 
+- [Feature 3] Add and delete tasks
 
 ## Technologies Used
 
@@ -40,16 +40,7 @@ You can run the entire application stack (backend, frontend, and database) using
 #### Project-specific details
 - **Node.js version**: 22.13.1 (as specified in Dockerfiles)
 - **MariaDB**: Uses the latest official image
-- **Environment variables**: The backend expects database credentials, which can be set via a `.env` file or directly in the `docker-compose.yml`. Make sure the credentials in your `.env` file match those in the compose file.
-
-Example `.env` file (if used):
-```bash
-DB_HOST=mariadb
-DB_PORT=3306
-DB_NAME=work_schedule
-DB_USER=work_user
-DB_PASSWORD=yourpasswordofchoice
-```
+- **Environment variables**: For the Docker setup, database credentials (host, user, password, database name) for the backend service (`js-backend`) are configured directly within the `environment:` section of the `docker-compose.yml` file. Ensure these match the credentials used by the `mariadb` service definition in the same file.
 
 #### Build and Run
 
@@ -66,10 +57,8 @@ You can access the frontend at [http://localhost:4173](http://localhost:4173).
 
 #### Special configuration
 - The backend and frontend containers run as non-root users for security.
-- Database credentials must match between your `.env` file and the `docker-compose.yml`.
-- The backend expects a MariaDB database named `work_schedule` with user `work_user` and the password you set.
+- **Automatic Database Initialization**: On the first run, Docker automatically initializes the MariaDB database. It creates the `work_schedule` database, the `work_user`, and sets the password based on the environment variables in `docker-compose.yml`. It then executes the SQL scripts found in the `./work-schedule-app/database/initdb` directory (mounted to `/docker-entrypoint-initdb.d` inside the container). This includes creating the necessary tables (`00-schema.sql`) and inserting a demo user (`01-init-user.sql` - username: `testuser1`, password: `a`).
 - Database data is persisted in a Docker volume (`mariadb_data`).
-- If you need to seed the database, use the SQL files in `./work-schedule-app/database/`.
 
 #### Ports
 - **Frontend**: 4173
@@ -83,7 +72,7 @@ You can access the frontend at [http://localhost:4173](http://localhost:4173).
 git clone https://github.com/viquta/Online_Daily_Work_Schedule.git
 
 # Navigate to the project directory
-cd Online_Work_Schedule_2.0
+cd Online_Daily_Work_Schedule # Adjust if your top-level directory name is different
 
 # Install backend dependencies
 cd work-schedule-app/backend
@@ -95,11 +84,13 @@ npm install
 # probably install vue-router also (i had to do this with my linux)
 
 # Set up the database
-# 1. Install MariaDB
-# 2. Create a database and a user (not recommending root), also if you are having trouble with this, just watch some tutorials or google
-# 3. Import or run the schema from ./database/schema.sql and uncomment + run the INSERT users for \database\seed_data.sql (more instructions in that document)
-# 4. Create a `.env` file in the project root directory (`Online_Daily_Work_Schedule/`). Copy the example below into this file and update the values (DB_USER, DB_PASSWORD, etc.) to match your database setup.
-# 5. Update your `work-schedule-app/backend/src/config/database.js` file if necessary (though it should read from the `.env` file by default).
+# 1. Install MariaDB.
+# 2. Create a database named 'work_schedule' and a user (e.g., 'work_user'). See the MariaDB command example below.
+# 3. Manually execute the SQL scripts located in the `./work-schedule-app/database/initdb/` directory against your 'work_schedule' database in the following order:
+#    - `00-schema.sql` (Creates the tables)
+#    - `01-init-user.sql` (Creates the 'testuser1' demo user with password 'a')
+# 4. Create a `.env` file in the root directory. Copy the example below into this file and update the values (DB_USER, DB_PASSWORD, etc.) to match your database setup.
+# 5. The backend code in `work-schedule-app/backend/src/config/database.js` reads these `.env` variables.
 
 # Start the backend
 cd work-schedule-app/backend
@@ -109,18 +100,18 @@ npm start
 cd work-schedule-frontend-new
 npm run dev
 ```
-How your .env file could look like: 
+How your `.env` file in `work-schedule-app/backend/` could look like:
 ```bash
-# Database configuration
+# Database configuration for Manual Setup
 DB_HOST=127.0.0.1
-DB_PORT=3001
+DB_PORT=3306
 DB_NAME=work_schedule
-DB_USER=your_username
-DB_PASSWORD=your_password_for_the_database
+DB_USER=work_user
+DB_PASSWORD=yourpasswordofchoice
 ```
 
 
-How it can look like on the terminal to put in your database and user
+Example MariaDB commands to create the database and user:
 ```bash
 MariaDB [(none)]> CREATE DATABASE work_schedule;
 Query OK, 1 row affected (0.002 sec)
@@ -128,13 +119,17 @@ Query OK, 1 row affected (0.002 sec)
 MariaDB [(none)]> CREATE USER 'work_user'@'localhost' IDENTIFIED BY 'yourpasswordofchoice';
 Query OK, 0 rows affected (0.010 sec)
 
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON work_schedule.* TO 'work_user'@'localhost';FLUSH PRIVILEGES;
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON work_schedule.* TO 'work_user'@'localhost';
 Query OK, 0 rows affected (0.009 sec)
 
+MariaDB [(none)]> FLUSH PRIVILEGES;
 Query OK, 0 rows affected (0.001 sec)
 
+MariaDB [work_schedule]> -- Now connect to the work_schedule database and run the SQL scripts from ./work-schedule-app/database/initdb/
+MariaDB [work_schedule]> SOURCE /path/to/your/clone/Online_Daily_Work_Schedule/work-schedule-app/database/initdb/00-schema.sql;
+MariaDB [work_schedule]> SOURCE /path/to/your/clone/Online_Daily_Work_Schedule/work-schedule-app/database/initdb/01-init-user.sql;
 ```
-And just like that, you have a running daily scheudle app on your local host! 
+And just like that, you have a running daily scheudle app on your local host!
 
 ## Usage
 

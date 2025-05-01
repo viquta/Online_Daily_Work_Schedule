@@ -4,15 +4,24 @@ services:
   js-backend:
     build:
       context: ./work-schedule-app/backend
-      dockerfile: ../backendDockerfile
     container_name: js-backend
     restart: unless-stopped
     init: true
-    # env_file: ../../.env  # Uncomment if .env file exists at project root
+    # Define environment variables here
+    environment:
+      - DB_HOST=mariadb
+      - DB_USER=work_user # Matches mariadb service
+      - DB_PASSWORD=yourpasswordofchoice # Matches mariadb service
+      - DB_NAME=work_schedule # Matches mariadb service
+      - NODE_ENV=production # Good practice to set explicitly
+      # Add other necessary env vars like SESSION_SECRET, FRONTEND_URL if needed
+      - SESSION_SECRET=replace_with_a_real_secret_in_production
+      - FRONTEND_URL=http://localhost:4173 # Or the external URL
     ports:
       - "3001:3001"
     depends_on:
-      - mariadb
+      mariadb: # Use long syntax for healthcheck dependency
+        condition: service_healthy
     networks:
       - appnet
     # The backend expects a MariaDB database, see README for .env setup
@@ -20,7 +29,7 @@ services:
   js-frontend:
     build:
       context: ./work-schedule-frontend-new
-      dockerfile: ../work-schedule-frontend-newDockerfile
+      #dockerfile: ../work-schedule-frontend-newDockerfile
     container_name: js-frontend
     restart: unless-stopped
     init: true
@@ -37,19 +46,22 @@ services:
     container_name: mariadb
     restart: unless-stopped
     environment:
-      - MYSQL_DATABASE=work_schedule
-      - MYSQL_USER=work_user
-      - MYSQL_PASSWORD=yourpasswordofchoice
-      - MYSQL_ROOT_PASSWORD=changeme
+      MYSQL_DATABASE: work_schedule
+      MYSQL_USER: work_user
+      MYSQL_PASSWORD: yourpasswordofchoice # <-- Use a strong password
+      MYSQL_ROOT_PASSWORD: changeme # <-- Use a strong password
     ports:
       - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
+      - ./database/initdb:/docker-entrypoint-initdb.d # <-- Corrected path
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      # Use CMD-SHELL for better variable interpolation
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u root -p\"$${MYSQL_ROOT_PASSWORD}\""]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     networks:
       - appnet
     # The database credentials should match those in your .env file
@@ -59,5 +71,4 @@ networks:
     driver: bridge
 
 volumes:
-  mariadb_data:
-    # Persistent storage for MariaDB
+  mariadb_data: {} # Define the named volume here (empty mapping is fine)

@@ -8,7 +8,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });
 
 // Create a connection pool
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'mariadb',
   user: process.env.DB_USER || 'your_db_user_name', //or 'root', but I gave the db_user all privileges to the database
   password: process.env.DB_PASSWORD || '', //password 
   database: process.env.DB_NAME || 'your_db_name',
