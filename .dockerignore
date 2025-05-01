@@ -1,1 +1,72 @@
-node_modules
+# Node.js dependencies
+node_modules/
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+.hg/
+.svn/
+
+# Environment and secrets
+.env*
+*.env
+*.pem
+*.key
+*.crt
+config.local.*
+*.local.yml
+
+# Build outputs and development artifacts
+dist/
+build/
+out/
+tmp/
+temp/
+*.tmp
+
+# Test and debug files
+test/
+tests/
+debug/
+*.log
+
+# Documentation and diagrams
+docs/
+documentation/
+*.md
+README*
+*.drawio
+
+# Project-specific
+local/
+.local/
+
+# Exclude database files (if not needed in build context)
+*.sql
+
+# Exclude HTML files in documentation
+*.html
+
+# Exclude all admin/test data files
+admin_cookies.txt
+create_test_data.js
+
+# Exclude sample queries and seed data
+sample_queries.sql
+schema.sql
+seed_data.sql
+
+# Exclude Dockerfiles and Compose files (if not needed in build context)
+Dockerfile*
+docker-compose*

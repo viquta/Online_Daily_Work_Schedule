@@ -1,0 +1,63 @@
+# Compose file for Online Daily Work Schedule
+
+services:
+  js-backend:
+    build:
+      context: ./work-schedule-app/backend
+      dockerfile: ../backendDockerfile
+    container_name: js-backend
+    restart: unless-stopped
+    init: true
+    # env_file: ../../.env  # Uncomment if .env file exists at project root
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mariadb
+    networks:
+      - appnet
+    # The backend expects a MariaDB database, see README for .env setup
+
+  js-frontend:
+    build:
+      context: ./work-schedule-frontend-new
+      dockerfile: ../work-schedule-frontend-newDockerfile
+    container_name: js-frontend
+    restart: unless-stopped
+    init: true
+    ports:
+      - "4173:4173"
+    networks:
+      - appnet
+    depends_on:
+      - js-backend
+    # env_file: ./.env  # Uncomment if .env file exists in frontend directory
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=work_schedule
+      - MYSQL_USER=work_user
+      - MYSQL_PASSWORD=yourpasswordofchoice
+      - MYSQL_ROOT_PASSWORD=changeme
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - appnet
+    # The database credentials should match those in your .env file
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+    # Persistent storage for MariaDB

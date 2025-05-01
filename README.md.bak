@@ -29,53 +29,8 @@ This is my third iteration at creating an online work scheduling system. The fir
 
 ## Installation
 
-### Option 1: Using Docker
-
-You can run the entire application stack (backend, frontend, and database) using Docker Compose. This is the recommended way to get started quickly and ensures all dependencies and versions are set up correctly.
-
-#### Requirements
-- Docker and Docker Compose installed
-- No other services running on ports 3001 (backend), 4173 (frontend), or 3306 (MariaDB)
-
-#### Project-specific details
-- **Node.js version**: 22.13.1 (as specified in Dockerfiles)
-- **MariaDB**: Uses the latest official image
-- **Environment variables**: The backend expects database credentials, which can be set via a `.env` file or directly in the `docker-compose.yml`. Make sure the credentials in your `.env` file match those in the compose file.
-
-Example `.env` file (if used):
-```bash
-DB_HOST=mariadb
-DB_PORT=3306
-DB_NAME=work_schedule
-DB_USER=work_user
-DB_PASSWORD=yourpasswordofchoice
-```
-
-#### Build and Run
-
-From the project root directory, run:
-```bash
-docker compose up --build
-```
-This will build and start the following services:
-- **js-backend** (Node.js/Express backend) on port **3001**
-- **js-frontend** (Vue.js frontend) on port **4173**
-- **mariadb** (database) on port **3306**
-
-You can access the frontend at [http://localhost:4173](http://localhost:4173).
-
-#### Special configuration
-- The backend and frontend containers run as non-root users for security.
-- Database credentials must match between your `.env` file and the `docker-compose.yml`.
-- The backend expects a MariaDB database named `work_schedule` with user `work_user` and the password you set.
-- Database data is persisted in a Docker volume (`mariadb_data`).
-- If you need to seed the database, use the SQL files in `./work-schedule-app/database/`.
-
-#### Ports
-- **Frontend**: 4173
-- **Backend**: 3001
-- **Database**: 3306
-
+### Option 1: Using Docker (Coming soon...)
+...
 ### Option 2: Manual Installation
 
 ```bash
