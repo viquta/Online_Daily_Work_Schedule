@@ -46,6 +46,12 @@ You can run the entire application stack (backend, frontend, and database) using
 
 From the project root directory, run:
 ```bash
+#mariadb, docker, and node.js should be already installed
+#1
+git clone https://github.com/viquta/Online_Daily_Work_Schedule.git
+#2
+cd Online_Daily_Work_Schedule
+#3
 docker compose up --build
 ```
 This will build and start the following services:
