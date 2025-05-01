@@ -29,7 +29,7 @@ This is my third iteration at creating an online work scheduling system. The fir
 
 ## Installation
 
-### Option 1: Using Docker
+### Option 1: Using Docker (Recommended) 
 
 You can run the entire application stack (backend, frontend, and database) using Docker Compose. This is the recommended way to get started quickly and ensures all dependencies and versions are set up correctly.
 
