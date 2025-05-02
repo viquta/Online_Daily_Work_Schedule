@@ -34,12 +34,28 @@ This is my third iteration at creating an online work scheduling system. The fir
 ### Option 2: Manual Installation
 Requrements for installation:
 - Node.js
-- MariaDB
+- MariaDB --> make a database and remember the password for it, you will need it for the ".env" file
 
 
 First clone the repository. Then navigate to the /work-schedule-app/backend folder and in the terminal write "npm install". Then go to the frontend directory (work-schedule-frontend-new) and in the terminal write "npm install". 
 
-You will need to manually run the sql scripts to create a user and a table. (wait, maybe i can make a script for this)
+You will need to manually run the sql scripts to create the user and database and its tables. For that, you would need a mariadb server. Once you get that you can run each create table statement (from the schema.sql in the /backend/database). Afterwards, you insert this demo user in your users table with this sql command: INSERT INTO users (username, $2b$10$6kFoUDFFxLbalV0.o0Mm0OCVBIQ5nm5ImNc56WXKzgPqbY8x5FqGq, first_name, last_name) VALUES ('testuser1', 'your_password_hash', 'Mary', 'Smith');
+
+The username will be "testuser1" and the password will be "a". If you want a different password, run in the terminal from your backend directory the following command: node -e "const bcrypt = require('bcrypt'); bcrypt.hash('your_password', 10).then(hash => console.log(hash));" 
+
+(more info in /backend/database/seed_data.sql, there I have some commented sql queries as examples)
+
+Furthermore, in the root directory you will need to create a ".env" file: 
+```bash
+# Database configuration
+DB_HOST=127.0.0.1
+DB_PORT=3001
+DB_NAME=work_schedule
+DB_USER=your_username
+DB_PASSWORD=your_password_for_the_database
+```
+
+How your terminal commands could look like: 
 
 ```bash
 # Clone the repository
