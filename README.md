@@ -39,10 +39,34 @@ Requrements for installation:
 
 First clone the repository. Then navigate to the /work-schedule-app/backend folder and in the terminal write "npm install". Then go to the frontend directory (work-schedule-frontend-new) and in the terminal write "npm install". 
 
-You will need to manually run the sql scripts to create the user and database and its tables. For that, you would need a mariadb server. Once you get that you can run each create table statement (from the schema.sql in the /backend/database). Afterwards, you insert this demo user in your users table with this sql command: INSERT INTO users (username, $2b$10$6kFoUDFFxLbalV0.o0Mm0OCVBIQ5nm5ImNc56WXKzgPqbY8x5FqGq, first_name, last_name) VALUES ('testuser1', 'your_password_hash', 'Mary', 'Smith');
+```bash
+# Clone the repository
+git clone https://github.com/viquta/Online_Daily_Work_Schedule.git
 
-The username will be "testuser1" and the password will be "a". If you want a different password, run in the terminal from your backend directory the following command: node -e "const bcrypt = require('bcrypt'); bcrypt.hash('your_password', 10).then(hash => console.log(hash));" 
+# Navigate to the project directory
+cd Online_Work_Schedule_2.0
 
+# Install backend dependencies
+cd work-schedule-app/backend
+npm install
+
+# Install frontend dependencies
+cd ../../work-schedule-frontend-new
+npm install
+# probably install vue-router also (i had to do this with my linux)
+```
+
+You will need to manually create and use the database and then run the sql scripts to create the tables. For the tables, see: /backend/database/schema.sql. For getting a database, you will need a mariadb server. Once you start mariadb, run each create table statement (from the schema.sql in the /backend/database). 
+
+Afterwards, you can insert this demo user in your users table with this sql command: 
+```bash
+INSERT INTO users (username, $2b$10$6kFoUDFFxLbalV0.o0Mm0OCVBIQ5nm5ImNc56WXKzgPqbY8x5FqGq, first_name, last_name) VALUES ('testuser1', 'your_password_hash', 'Mary', 'Smith');
+```
+
+The username will be "testuser1" and the password will be "a". If you want a different password, run in the terminal from your backend directory the following command:
+```bash
+node -e "const bcrypt = require('bcrypt'); bcrypt.hash('your_password', 10).then(hash => console.log(hash));" 
+```
 (more info in /backend/database/seed_data.sql, there I have some commented sql queries as examples)
 
 Furthermore, in the root directory you will need to create a ".env" file: 
@@ -51,7 +75,7 @@ Furthermore, in the root directory you will need to create a ".env" file:
 DB_HOST=127.0.0.1
 DB_PORT=3001
 DB_NAME=work_schedule
-DB_USER=your_username
+DB_USER=your_username_for_the_database
 DB_PASSWORD=your_password_for_the_database
 ```
 
