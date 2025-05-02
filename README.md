@@ -60,7 +60,7 @@ You will need to manually create and use the database and then run the sql scrip
 
 Afterwards, you can insert this demo user in your users table with this sql command: 
 ```bash
-INSERT INTO users (username, $2b$10$6kFoUDFFxLbalV0.o0Mm0OCVBIQ5nm5ImNc56WXKzgPqbY8x5FqGq, first_name, last_name) VALUES ('testuser1', 'your_password_hash', 'Mary', 'Smith');
+INSERT INTO users (username, your_password_hash, first_name, last_name) VALUES ('testuser1', '$2b$10$6kFoUDFFxLbalV0.o0Mm0OCVBIQ5nm5ImNc56WXKzgPqbY8x5FqGq' , 'Mary', 'Smith');
 ```
 
 The username will be "testuser1" and the password will be "a". If you want a different password, run in the terminal from your backend directory the following command:
