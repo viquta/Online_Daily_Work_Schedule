@@ -32,6 +32,14 @@ This is my third iteration at creating an online work scheduling system. The fir
 ### Option 1: Using Docker (Coming soon...)
 ...
 ### Option 2: Manual Installation
+Requrements for installation:
+- Node.js
+- MariaDB
+
+
+First clone the repository. Then navigate to the /work-schedule-app/backend folder and in the terminal write "npm install". Then go to the frontend directory (work-schedule-frontend-new) and in the terminal write "npm install". 
+
+You will need to manually run the sql scripts to create a user and a table. (wait, maybe i can make a script for this)
 
 ```bash
 # Clone the repository
