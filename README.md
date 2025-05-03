@@ -2,30 +2,12 @@
 
 A simple page application that uses Vue for managing work schedules efficiently.
 
-## Project Overview
-
-This is my third iteration at creating an online work scheduling system. The first attempt lacked a proper gitignore file, and in the second attempt, I wanted too many features (so I got lost in the process). In this third attmempt, I managed to create a simple yet reliable daily schedule for individual users. The server is by default setup to manage up to 10 users but I think that this can be increased. 
-
-## Why This Project Uses a Database
-
-  - Easy to scale up --> I used normal forms for building the datase, meaning that new tables can safely be added for additional features. (Howeve, the backend logic would need to be updated.)
-  - Robust structure
-  - Can store large volumes of data
-    (source: Mastering Node.js Web Development : Go on a Comprehensive Journey From the Fundamentals to Advanced Web Development with Node.js)
-
 ## Features
 
 - [Feature 1] Login and log out with encrypted password
 - [Feature 2] Daily schedule view per user per date
 - [Feature 3] Add and delete tasks 
 
-## Technologies Used
-
-- **Frontend**: Vue.js 3, Bootstrap 5, Pinia, DataTables
-- **Backend**: Node.js, Express.js, CORS
-- **Database**: MariaDB
-- **Authentication**: Express Sessions, bcrypt
-- **Build Tools**: Vite
 
 ## Installation
 
@@ -138,6 +120,15 @@ Query OK, 0 rows affected (0.001 sec)
 
 ```
 And just like that, you have a running daily scheudle app on your local host! 
+
+
+## Technologies Used
+
+- **Frontend**: Vue.js 3, Bootstrap 5, Pinia, DataTables
+- **Backend**: Node.js, Express.js, CORS
+- **Database**: MariaDB
+- **Authentication**: Express Sessions, bcrypt
+- **Build Tools**: Vite
 
 ## Usage
 
