@@ -1,3 +1,6 @@
+see security page...Axios is vulnerable to DoS attack through lack of data size check (dont use for production until i fix this..)
+
+
 # Online Daily Work Schedule
 
 A simple page application that uses Vue for managing work schedules efficiently.
